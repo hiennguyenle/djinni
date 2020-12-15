@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
     s.name             = 'Djinni'
-    s.version          = '4.6.0-beta.2'
+    s.version          = '4.6.1'
     s.summary          = 'Djinni is a tool for generating cross-language type declarations and interface bindings.'
     s.description      = <<-DESC
     Djinni is a tool for generating cross-language type declarations and interface bindings.

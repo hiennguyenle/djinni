@@ -5,27 +5,27 @@
     
     
       
-      <testcase classname="fastlane.lanes" name="0: Verifying fastlane version" time="0.009534">
+      <testcase classname="fastlane.lanes" name="0: Verifying fastlane version" time="0.000668">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="1: default_platform" time="0.001263">
+      <testcase classname="fastlane.lanes" name="1: default_platform" time="0.00022">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="2: version_bump_podspec" time="0.00197">
+      <testcase classname="fastlane.lanes" name="2: version_bump_podspec" time="0.001044">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="3: version_bump_podspec" time="0.002093">
+      <testcase classname="fastlane.lanes" name="3: version_bump_podspec" time="0.000957">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="4: pod_push" time="24.005506">
+      <testcase classname="fastlane.lanes" name="4: pod_push" time="3.752491">
         
       </testcase>
     

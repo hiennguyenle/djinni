@@ -9,8 +9,7 @@
 #include "hello_impl.hpp"
 #include "my_record.hpp"
 #include <optional>
-//#include <rc+json.hpp>
-#include <my_record+json.hpp>
+
 #include "json.hpp"
 using json = nlohmann::json;
 

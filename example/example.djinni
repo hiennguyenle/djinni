@@ -61,3 +61,7 @@ my_record = record {
 
     test17: map<my_enum, i16>;
 }
+
+json_record = record {
+    optional_rc: optional<rc>;
+}

@@ -212,6 +212,8 @@ class CppGenerator(spec: Spec) extends Generator(spec) {
 
     refs.hpp.add("#include <utility>") // Add for std::move
     refs.hpp.add("#include <string>") // Add for std::string
+    refs.hpp.add("#include <json.hpp>")
+    refs.hpp.add("#include <json+extension.hpp>")
     
     val self = marshal.typename(ident, r)
     val (cppName, cppFinal) = if (r.ext.cpp) (ident.name + "_base", "") else (ident.name, "")
@@ -315,59 +317,67 @@ class CppGenerator(spec: Spec) extends Generator(spec) {
       }
     }
 
-    writeHppFile(cppName, origin, refs.hpp, refs.hppFwds, writeCppPrototype)
-
-    writeHppJsonExtension(ident, s"$cppName+json", origin, fields, w => {
-      writeDoc(w, doc)
+    def writeJsonExtension(w: IndentWriter) {
+      w.wl
+      w.wl
 
       val recordSelf = marshal.fqTypename(ident, r)
 
-      w.wl("template <>")
-      w.w(s"struct adl_serializer<${recordSelf}> ").braced {
-        // From JSON
-        w.w(s"static $recordSelf from_json(const json & j) ").braced {
-          w.wl(s"auto result = ${recordSelf}();")
-          for (i <- 0 to (fields).length - 1) {  
-            val name = idCpp.field(fields(i).ident)
-            fields(i).ty.resolved.base match {
-              case df: MDef => df.defType match {
-                case DRecord => {
+      w.w("namespace nlohmann").braced {
+        w.wl("template <>")
+        w.w(s"struct adl_serializer<${recordSelf}> ").braced {
+          // From JSON
+          w.w(s"static $recordSelf from_json(const json & j) ").braced {
+            w.wl(s"auto result = ${recordSelf}();")
+            for (i <- 0 to (fields).length - 1) {  
+              val name = idCpp.field(fields(i).ident)
+              fields(i).ty.resolved.base match {
+                case df: MDef => df.defType match {
+                  case DRecord => {
+                    w.w(s"""if (j.contains("${name}"))""").braced {
+                      w.wl(s"""result.${name} = j.at("${name}").get<${marshal.fqTypename(fields(i).ty)}>();""")
+                    }
+                  }
+                  case _ => 
+                }
+                case _ => {
                   w.w(s"""if (j.contains("${name}"))""").braced {
-                    w.wl(s"""result.${name} = j.at("${name}").get<${marshal.fqTypename(fields(i).ty)}>();""")
+                    w.wl(s"""j.at("${name}").get_to(result.${name});""")
                   }
                 }
-                case _ => 
               }
-              case _ => {
-                w.w(s"""if (j.contains("${name}"))""").braced {
-                  w.wl(s"""j.at("${name}").get_to(result.${name});""")
+            }
+            w.wl("return result;")
+          }
+
+          // To JSON
+          w.w(s"static void to_json(json & j, $recordSelf item) ").braced {
+            w.w(s"j = json").braced {
+              for (i <- 0 to (fields).length - 1) {
+                val name = idCpp.field(fields(i).ident)
+                
+                val comma = if (i < (fields).length - 1) "," else ""
+
+                fields(i).ty.resolved.base match {
+                  case _ => {
+                    w.wl(s"""{"${name}", item.${name}}${comma}""")
+                  }
                 }
               }
             }
+            w.wl(";")
           }
-          w.wl("return result;")
         }
-
-        // To JSON
-        w.w(s"static void to_json(json & j, $recordSelf item) ").braced {
-          w.w(s"j = json").braced {
-            for (i <- 0 to (fields).length - 1) {
-              val name = idCpp.field(fields(i).ident)
-              
-              val comma = if (i < (fields).length - 1) "," else ""
-
-              fields(i).ty.resolved.base match {
-                case _ => {
-                  w.wl(s"""{"${name}", item.${name}}${comma}""")
-                }
-              }
-            }
-          }
-          w.wl(";")
-        }
+        w.wl(";")
       }
-      w.wl(";")
-    })
+    }
+
+    writeHppFile(cppName, origin, refs.hpp, refs.hppFwds, writeCppPrototype, writeJsonExtension)
+
+    // writeHppJsonExtension(ident, s"$cppName+json", origin, fields, w => {
+    //   writeDoc(w, doc)
+      
+    // })
 
     // if (r.consts.nonEmpty || r.derivingTypes.contains(DerivingType.Eq) || r.derivingTypes.contains(DerivingType.Ord)) {
       writeCppFile(cppName, origin, refs.cpp, w => {

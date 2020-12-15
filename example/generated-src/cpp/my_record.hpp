@@ -7,6 +7,8 @@
 #include "rc.hpp"
 #include <chrono>
 #include <cstdint>
+#include <json+extension.hpp>
+#include <json.hpp>
 #include <optional>
 #include <string>
 #include <unordered_map>
@@ -84,3 +86,97 @@ struct  MyRecord {
 };
 
 }  // namespace textsort
+
+
+namespace nlohmann {
+    template <>
+    struct adl_serializer<::textsort::MyRecord>  {
+        static ::textsort::MyRecord from_json(const json & j)  {
+            auto result = ::textsort::MyRecord();
+            if (j.contains("test")) {
+                j.at("test").get_to(result.test);
+            }
+            if (j.contains("test1")) {
+                j.at("test1").get_to(result.test1);
+            }
+            if (j.contains("test2")) {
+                j.at("test2").get_to(result.test2);
+            }
+            if (j.contains("test3")) {
+                j.at("test3").get_to(result.test3);
+            }
+            if (j.contains("test3_1")) {
+                j.at("test3_1").get_to(result.test3_1);
+            }
+            if (j.contains("test4")) {
+                j.at("test4").get_to(result.test4);
+            }
+            if (j.contains("test4_1")) {
+                j.at("test4_1").get_to(result.test4_1);
+            }
+            if (j.contains("test5")) {
+                j.at("test5").get_to(result.test5);
+            }
+            if (j.contains("test6")) {
+                j.at("test6").get_to(result.test6);
+            }
+            if (j.contains("test7")) {
+                j.at("test7").get_to(result.test7);
+            }
+            if (j.contains("test8")) {
+                j.at("test8").get_to(result.test8);
+            }
+            if (j.contains("test9")) {
+                result.test9 = j.at("test9").get<::textsort::Rc>();
+            }
+            if (j.contains("test10")) {
+                j.at("test10").get_to(result.test10);
+            }
+            if (j.contains("test10_1")) {
+                j.at("test10_1").get_to(result.test10_1);
+            }
+            if (j.contains("test13")) {
+                j.at("test13").get_to(result.test13);
+            }
+            if (j.contains("test14")) {
+                j.at("test14").get_to(result.test14);
+            }
+            if (j.contains("test15")) {
+                j.at("test15").get_to(result.test15);
+            }
+            if (j.contains("test16")) {
+                j.at("test16").get_to(result.test16);
+            }
+            if (j.contains("test17")) {
+                j.at("test17").get_to(result.test17);
+            }
+            return result;
+        }
+        static void to_json(json & j, ::textsort::MyRecord item)  {
+            j = json {
+                {"test", item.test},
+                {"test1", item.test1},
+                {"test2", item.test2},
+                {"test3", item.test3},
+                {"test3_1", item.test3_1},
+                {"test4", item.test4},
+                {"test4_1", item.test4_1},
+                {"test5", item.test5},
+                {"test6", item.test6},
+                {"test7", item.test7},
+                {"test8", item.test8},
+                {"test9", item.test9},
+                {"test10", item.test10},
+                {"test10_1", item.test10_1},
+                {"test11", item.test11},
+                {"test13", item.test13},
+                {"test14", item.test14},
+                {"test15", item.test15},
+                {"test16", item.test16},
+                {"test17", item.test17}
+            }
+            ;
+        }
+    }
+    ;
+}
