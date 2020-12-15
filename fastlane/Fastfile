@@ -2,7 +2,7 @@ fastlane_version "2.70.1"
 default_platform :ios
 
 def get_libary_version
-    return '4.6.0-beta.2'
+    return '4.6.0'
 end
 
 lane :submit_podspecs do

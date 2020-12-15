@@ -258,18 +258,18 @@ class JavaGenerator(spec: Spec) extends Generator(spec) {
     if (params.isEmpty) "" else params.map(p => idJava.typeParam(p.ident)).mkString("<", ", ", ">")
 
   override def generateRecord(origin: String, ident: Ident, doc: Doc, params: Seq[TypeParam], r: Record, deprecated: scala.Option[Deprecated], idl: Seq[TypeDecl]) {
-    val refs = new JavaRefs()
-    r.fields.foreach(f => refs.find(f.ty))
-
-    val javaName = if (r.ext.java) (ident.name + "_base") else ident.name
-    // val javaFinal = if (!r.ext.java && spec.javaUseFinalForRecord) "final " else ""
-    val javaFinal = ""
-
     val superRecord = getSuperRecord(idl, r)
     val superFields: Seq[Field] = superRecord match {
       case None => Seq.empty
       case Some(value) => value.fields
     }
+    
+    val refs = new JavaRefs()
+    (superFields ++ r.fields).foreach(f => refs.find(f.ty))
+
+    val javaName = if (r.ext.java) (ident.name + "_base") else ident.name
+    // val javaFinal = if (!r.ext.java && spec.javaUseFinalForRecord) "final " else ""
+    val javaFinal = ""
 
     def recordContainsSets(r: Record): Boolean = {
       for (f <- r.fields) {
@@ -619,7 +619,10 @@ class JavaGenerator(spec: Spec) extends Generator(spec) {
 
     w.wl
     w.w(s"public $self(android.os.Parcel in)").braced {
-      for (f <- (superFields ++ r.fields))
+      if (superFields.nonEmpty) {
+        w.wl("super(in);")
+      }
+      for (f <- (r.fields))
         deserializeField(f, f.ty.resolved.base, false)
     }
 
@@ -696,7 +699,11 @@ class JavaGenerator(spec: Spec) extends Generator(spec) {
     w.wl
     w.wl("@Override")
     w.w("public void writeToParcel(android.os.Parcel out, int flags)").braced {
-      for (f <- (superFields ++ r.fields))
+      if (superFields.nonEmpty) {
+        w.wl("super.writeToParcel(out, flags);")
+      }
+
+      for (f <- (r.fields))
         serializeField(f, f.ty.resolved.base, false)
     }
     w.wl

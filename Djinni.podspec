@@ -21,7 +21,7 @@ Pod::Spec.new do |s|
     
     s.dependency 'DjinniSwift', "#{s.version}"
     
-    s.ios.deployment_target  = '9.0'
+    s.ios.deployment_target  = '12.0'
     s.osx.deployment_target  = '10.10'
         
     s.pod_target_xcconfig = {
