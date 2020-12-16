@@ -6,5 +6,8 @@
 
 namespace textsort {
 
+std::string Rc::description() const {
+    return ((nlohmann::json)(*this)).dump(2);
+}
 
 }  // namespace textsort

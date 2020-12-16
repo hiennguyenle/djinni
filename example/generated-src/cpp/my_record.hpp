@@ -83,10 +83,10 @@ struct  MyRecord {
     {}
 
     MyRecord() = default;
+    virtual std::string description() const;
 };
 
 }  // namespace textsort
-
 
 namespace nlohmann {
     template <>

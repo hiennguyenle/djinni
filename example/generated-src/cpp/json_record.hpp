@@ -20,10 +20,10 @@ struct  JsonRecord {
     {}
 
     JsonRecord() = default;
+    virtual std::string description() const;
 };
 
 }  // namespace textsort
-
 
 namespace nlohmann {
     template <>
