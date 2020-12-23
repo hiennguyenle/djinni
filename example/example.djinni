@@ -65,3 +65,7 @@ my_record = record {
 json_record = record {
     optional_rc: optional<rc>;
 }
+
+json_record_1 = record extends json_record {
+    optional_rc_1: optional<rc>;
+}

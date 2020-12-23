@@ -187,24 +187,6 @@ class CppGenerator(spec: Spec) extends Generator(spec) {
     }
   }
   
-  def writeHppJsonExtension(ident: Ident, name: String, origin: String, fields: Seq[Field], f: IndentWriter => Unit, f2: IndentWriter => Unit = (w => {})) {
-    val refs = new CppRefs(ident.name)
-    refs.hpp.add("#include <json.hpp>")
-    refs.hpp.add("#include <json+extension.hpp>")
-    refs.hpp.add(s"""#include "${ident.name}.hpp"""")
-
-    // Import header json extension.
-    fields.foreach(f => f.ty.resolved.base match {
-      case d: MDef =>
-        d.defType match {
-          case DRecord => refs.hpp.add(s"""#include "${d.name}+json.hpp"""")
-          case _ =>
-        }
-      case _ =>
-    })
-    writeHppFileGeneric(spec.cppHeaderOutFolder.get, "nlohmann" , spec.cppFileIdentStyle)(name, origin, refs.hpp, refs.hppFwds, f, f2)
-  }
-
   override def generateRecord(origin: String, ident: Ident, doc: Doc, params: Seq[TypeParam], r: Record, deprecated: scala.Option[Deprecated], idl: Seq[TypeDecl]) {
     val refs = new CppRefs(ident.name)
     r.fields.foreach(f => refs.find(f.ty, forwardDeclareOnly = false))
@@ -214,7 +196,7 @@ class CppGenerator(spec: Spec) extends Generator(spec) {
     refs.hpp.add("#include <string>") // Add for std::string
     refs.hpp.add("#include <json.hpp>")
     refs.hpp.add("#include <json+extension.hpp>")
-    
+
     val self = marshal.typename(ident, r)
     val (cppName, cppFinal) = if (r.ext.cpp) (ident.name + "_base", "") else (ident.name, "")
 
@@ -238,9 +220,9 @@ class CppGenerator(spec: Spec) extends Generator(spec) {
       case None => Seq.empty
       case Some(value) => value.fields
     }
-
+    
     val fields = superFields ++ r.fields
-
+    
     // C++ Header
     def writeCppPrototype(w: IndentWriter) {
       if (r.ext.cpp) {
@@ -314,15 +296,17 @@ class CppGenerator(spec: Spec) extends Generator(spec) {
           w.wl(s"$actualSelf& operator=(const $actualSelf&) = default;")
           w.wl(s"$actualSelf& operator=($actualSelf&&) = default;")
         }
+
+        superRecord match {
+          case None => w.wl("virtual std::string description() const;")
+          case Some(value) => w.wl("std::string description() const override;")
+        }
       }
     }
 
     def writeJsonExtension(w: IndentWriter) {
       w.wl
-      w.wl
-
       val recordSelf = marshal.fqTypename(ident, r)
-
       w.w("namespace nlohmann").braced {
         w.wl("template <>")
         w.w(s"struct adl_serializer<${recordSelf}> ").braced {
@@ -373,11 +357,6 @@ class CppGenerator(spec: Spec) extends Generator(spec) {
     }
 
     writeHppFile(cppName, origin, refs.hpp, refs.hppFwds, writeCppPrototype, writeJsonExtension)
-
-    // writeHppJsonExtension(ident, s"$cppName+json", origin, fields, w => {
-    //   writeDoc(w, doc)
-      
-    // })
 
     // if (r.consts.nonEmpty || r.derivingTypes.contains(DerivingType.Eq) || r.derivingTypes.contains(DerivingType.Ord)) {
       writeCppFile(cppName, origin, refs.cpp, w => {
@@ -432,11 +411,9 @@ class CppGenerator(spec: Spec) extends Generator(spec) {
           }
         }
 
-
-
-
-
-
+        w.w(s"std::string $actualSelf::description() const").braced {
+          w.wl("return ((nlohmann::json)(*this)).dump(2);")
+        }
 
 
 
