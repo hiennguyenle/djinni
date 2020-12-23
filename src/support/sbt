@@ -33,7 +33,7 @@ if [[ "$DJINNI_SBT_BOOT_PROPERTIES" != "" ]]; then
 fi
 
 java \
-    -Xms512M -Xmx1024M -Xss1M -XX:+CMSClassUnloadingEnabled "${jvm_args[@]}" \
+    -Xms512M -Xmx1024M -Xss1M "${jvm_args[@]}" \
     -Djava.security.manager -Djava.security.policy="$base_dir/sbt.security.policy" \
     -jar "$base_dir/sbt-launch.jar" \
     -Dsbt.override.build.repos=true \
