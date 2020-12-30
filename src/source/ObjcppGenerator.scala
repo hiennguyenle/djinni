@@ -330,10 +330,16 @@ class ObjcppGenerator(spec: Spec) extends BaseObjcGenerator(spec) {
   }
   
   override def generateRecord(origin: String, ident: Ident, doc: Doc, params: Seq[TypeParam], r: Record, deprecated: scala.Option[Deprecated], idl: Seq[TypeDecl]) {
+    val superRecord = getSuperRecord(idl, r)
+    val superFields: Seq[Field] = superRecord match {
+      case None => Seq.empty
+      case Some(value) => value.fields
+    }
+
     val refs = new ObjcRefs()
     for (c <- r.consts)
       refs.find(c.ty)
-    for (f <- r.fields)
+    for (f <- r.fields ++ superFields)
       refs.find(f.ty)
     
     val objcName = ident.name + (if (r.ext.objc) "_base" else "")
