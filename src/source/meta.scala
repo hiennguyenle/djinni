@@ -26,7 +26,7 @@ package object meta {
   val defaults: Map[String, MOpaque] = immutable.HashMap(
 
     ("u8", MPrimitive( "u8",  "short", "jshort", "uint8_t", "Short", "S", "uint8_t", "NSNumber", "UInt8")),
-    ("u16", MPrimitive( "u16",  "int", "jint", "uint16_t", "Integer", "I", "uint16_t", "NSNumber", "UIn16")),
+    ("u16", MPrimitive( "u16",  "int", "jint", "uint16_t", "Integer", "I", "uint16_t", "NSNumber", "UInt16")),
     ("u32", MPrimitive( "u32",  "long", "jlong", "uint32_t", "Long", "J", "uint32_t", "NSNumber", "UInt32")),
 
     ("i8", MPrimitive(  "i8",   "byte",     "jbyte", "int8_t", "Byte", "B", "int8_t", "NSNumber", "Int8")),

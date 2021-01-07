@@ -120,7 +120,7 @@ class SwiftGenerator(spec: Spec) extends ObjcGenerator(spec) {
       }
 
       // ----------- GENERATE SWIFT/OBJC WRAPPER
-      def writeSwiftExtension(fields: Seq[Field], className: String, w: IndentWriter): Unit = {
+      def writeSwiftExtension(superFields: Seq[Field], fields: Seq[Field], className: String, w: IndentWriter): Unit = {
         def swiftObsoleted: String = "@available(swift, obsoleted: 1.0)"
         w.w(s"extension $className ").braced {
           val needWriteForceCastConstructor = true
@@ -142,13 +142,13 @@ class SwiftGenerator(spec: Spec) extends ObjcGenerator(spec) {
           if (needWriteForceCastConstructor) {
             // wrapper init
             w.wl(swiftObsoleted)
-            writeAlignedSwiftCall(w, "@objc public static func `init`(", fields, s") -> ${className}", f => {
+            writeAlignedSwiftCall(w, "@objc public static func `init`(", superFields++fields, s") -> ${className}", f => {
               val swiftBridgingType = swiftMarshal.getSwiftBridgingType(f.ty.resolved)
               val name = idSwift.field(f.ident)
               (name, s"${swiftBridgingType.wrapper}")
             }).braced {
               if (fields.nonEmpty) {
-                writeAlignedSwiftCall(w, s"return ${className}.init(", fields, ")", f => {
+                writeAlignedSwiftCall(w, s"return ${className}.init(", superFields++fields, ")", f => {
                   val swiftBridgingType = swiftMarshal.getSwiftBridgingType(f.ty.resolved)
                   val name = idSwift.field(f.ident)
                   if (swiftBridgingType.downcast) {
@@ -163,7 +163,7 @@ class SwiftGenerator(spec: Spec) extends ObjcGenerator(spec) {
       }
 
       writeSwiftFile(s"$className+Internal", origin = origin, header, w => {
-        writeSwiftExtension(fields = superFields ++ r.fields, className = className, w = w)
+        writeSwiftExtension(superFields, r.fields, className = className, w = w)
       })
     })
   }
