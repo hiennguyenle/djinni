@@ -3,71 +3,43 @@
 
 #pragma once
 
-#include "my_enum.hpp"
+#include "hien.hpp"
 #include <cstdint>
-#include <json+extension.hpp>
-#include <json.hpp>
-#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
 
-namespace textsort {
+namespace cpp_generated {
 
 struct  Rc {
     int32_t a;
     int32_t b;
-    std::optional<int32_t> c;
-    my_enum d;
-    std::vector<uint8_t> e;
+    uint32_t c;
+    std::string d;
+    std::vector<int16_t> list_16;
+    std::vector<int32_t> list;
+    std::vector<int8_t> list8;
+    std::vector<Hien> list_hien;
 
     Rc(int32_t a_,
        int32_t b_,
-       std::optional<int32_t> c_,
-       my_enum d_,
-       std::vector<uint8_t> e_)
+       uint32_t c_,
+       std::string d_,
+       std::vector<int16_t> list_16_,
+       std::vector<int32_t> list_,
+       std::vector<int8_t> list8_,
+       std::vector<Hien> list_hien_)
     : a(std::move(a_))
     , b(std::move(b_))
     , c(std::move(c_))
     , d(std::move(d_))
-    , e(std::move(e_))
+    , list_16(std::move(list_16_))
+    , list(std::move(list_))
+    , list8(std::move(list8_))
+    , list_hien(std::move(list_hien_))
     {}
 
     Rc() = default;
-    virtual std::string description() const;
 };
 
-}  // namespace textsort
-
-namespace nlohmann {
-    template <>
-    struct adl_serializer<::textsort::Rc>  {
-        static ::textsort::Rc from_json(const json & j)  {
-            auto result = ::textsort::Rc();
-            if (j.contains("a")) {
-                j.at("a").get_to(result.a);
-            }
-            if (j.contains("b")) {
-                j.at("b").get_to(result.b);
-            }
-            if (j.contains("c")) {
-                j.at("c").get_to(result.c);
-            }
-            if (j.contains("e")) {
-                j.at("e").get_to(result.e);
-            }
-            return result;
-        }
-        static void to_json(json & j, ::textsort::Rc item)  {
-            j = json {
-                {"a", item.a},
-                {"b", item.b},
-                {"c", item.c},
-                {"d", item.d},
-                {"e", item.e}
-            }
-            ;
-        }
-    }
-    ;
-}
+}  // namespace cpp_generated

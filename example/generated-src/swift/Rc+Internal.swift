@@ -18,32 +18,56 @@ extension Rc  {
         }
     }
     @available(swift, obsoleted: 1.0)
-    @objc public var __djinni__objc_c: NSNumber? {
+    @objc public var __djinni__objc_c: UInt32 {
         get {
-            return DjinniSwift.I32.toObjc(e: c)
+            return c
         }
     }
     @available(swift, obsoleted: 1.0)
-    @objc public var __djinni__objc_d: MyEnum {
+    @objc public var __djinni__objc_d: String {
         get {
             return d
         }
     }
     @available(swift, obsoleted: 1.0)
-    @objc public var __djinni__objc_e: Data {
+    @objc public var __djinni__objc_list16: Array<Int16> {
         get {
-            return e
+            return list16
+        }
+    }
+    @available(swift, obsoleted: 1.0)
+    @objc public var __djinni__objc_list: Array<Int32> {
+        get {
+            return list
+        }
+    }
+    @available(swift, obsoleted: 1.0)
+    @objc public var __djinni__objc_list8: Array<Int8> {
+        get {
+            return list8
+        }
+    }
+    @available(swift, obsoleted: 1.0)
+    @objc public var __djinni__objc_listHien: Array<Hien> {
+        get {
+            return listHien
         }
     }
     @available(swift, obsoleted: 1.0)
     @objc public static func `init`(a: Int32,
                                     b: Int32,
-                                    c: NSNumber?,
-                                    d: MyEnum,
-                                    e: Data) -> Rc {
+                                    c: UInt32,
+                                    d: String,
+                                    list16: Array<Int16>,
+                                    list: Array<Int32>,
+                                    list8: Array<Int8>,
+                                    listHien: Array<Hien>) -> Rc {
         return Rc.init(a: a,
                        b: b,
-                       c: DjinniSwift.I32.fromObjc(e: c),
+                       c: c,
                        d: d,
-                       e: e)}
+                       list16: list16,
+                       list: list,
+                       list8: list8,
+                       listHien: listHien)}
 }

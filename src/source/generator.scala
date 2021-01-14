@@ -98,6 +98,7 @@ package object generatorTools {
         }
         new YamlGenerator(spec).generate(idl)
       }
+      
       if (spec.pyOutFolder.isDefined) {
         DEBUG(spec.pyOutFolder.get.toString)
         if (!spec.skipGeneration) {
@@ -105,13 +106,17 @@ package object generatorTools {
         }
         new PythonGenerator(spec).generate(idl)
       }
+
       if (spec.cWrapperOutFolder.isDefined) {
         DEBUG(spec.cWrapperOutFolder.get.toString)
         if (!spec.skipGeneration) {
           createFolder("C", spec.cWrapperOutFolder.get)
         }
-        new CWrapperGenerator(spec).generate(idl)
+        new CgoWrapperGenerator(spec).generate(idl)
+        // new CWrapperGenerator(spec).generate(idl)
+        // CgoWrapperGenerator
       }
+
       if (spec.pycffiOutFolder.isDefined) {
         DEBUG(spec.pycffiOutFolder.get.toString)
         if (!spec.skipGeneration) {

@@ -3,6 +3,7 @@
 
 package com.dropbox.textsort;
 
+import java.util.ArrayList;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
@@ -13,23 +14,23 @@ import javax.annotation.Nonnull;
 
     /*package*/ final int mB;
 
-    /*package*/ final Integer mC;
+    /*package*/ final long mC;
 
-    /*package*/ final MyEnum mD;
+    /*package*/ final String mD;
 
-    /*package*/ final byte[] mE;
+    /*package*/ final ArrayList<Integer> mList;
 
     public Rc(
             int a,
             int b,
-            @CheckForNull Integer c,
-            @Nonnull MyEnum d,
-            @Nonnull byte[] e) {
+            long c,
+            @Nonnull String d,
+            @Nonnull ArrayList<Integer> list) {
         this.mA = a;
         this.mB = b;
         this.mC = c;
         this.mD = d;
-        this.mE = e;
+        this.mList = list;
     }
 
     public int getA() {
@@ -40,19 +41,18 @@ import javax.annotation.Nonnull;
         return mB;
     }
 
-    @CheckForNull
-    public Integer getC() {
+    public long getC() {
         return mC;
     }
 
     @Nonnull
-    public MyEnum getD() {
+    public String getD() {
         return mD;
     }
 
     @Nonnull
-    public byte[] getE() {
-        return mE;
+    public ArrayList<Integer> getList() {
+        return mList;
     }
 
     @Override
@@ -62,7 +62,7 @@ import javax.annotation.Nonnull;
                 "," + "mB=" + mB +
                 "," + "mC=" + mC +
                 "," + "mD=" + mD +
-                "," + "mE=" + mE +
+                "," + "mList=" + mList +
         "}";
     }
 

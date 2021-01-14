@@ -3,9 +3,9 @@
 
 from djinni.support import MultiSet # default imported in all files
 from djinni.exception import CPyException # default imported in all files
-from djinni.pycffi_marshal import CPyBinary, CPyBoxedI32, CPyEnum, CPyPrimitive, CPyRecord
+from djinni.pycffi_marshal import CPyObject, CPyPrimitive, CPyRecord, CPyString
 
-from my_enum import MyEnum
+from dh__list_int32_t import ListInt32THelper
 from PyCFFIlib_cffi import ffi, lib
 
 from djinni import exception # this forces run of __init__.py which gives cpp option to call back into py to create exception
@@ -36,44 +36,44 @@ class RcHelper:
             CPyException.setExceptionFromPy(_djinni_py_e)
             return ffi.NULL
 
-    @ffi.callback("struct DjinniBoxedI32 *(struct DjinniRecordHandle *)")
+    @ffi.callback("uint32_t(struct DjinniRecordHandle *)")
     def get_rc_f3(cself):
         try:
-            with CPyBoxedI32.fromPyOpt(CPyRecord.toPy(None, cself).c) as py_obj:
-                return py_obj.release_djinni_boxed()
-        except Exception as _djinni_py_e:
-            CPyException.setExceptionFromPy(_djinni_py_e)
-            return ffi.NULL
-
-    @ffi.callback("int(struct DjinniRecordHandle *)")
-    def get_rc_f4(cself):
-        try:
-            _ret = CPyEnum.fromPy(CPyRecord.toPy(None, cself).d)
-            assert _ret != -1
+            _ret = CPyPrimitive.fromPy(CPyRecord.toPy(None, cself).c)
             return _ret
         except Exception as _djinni_py_e:
             CPyException.setExceptionFromPy(_djinni_py_e)
             return ffi.NULL
 
-    @ffi.callback("struct DjinniBinary *(struct DjinniRecordHandle *)")
-    def get_rc_f5(cself):
+    @ffi.callback("struct DjinniString *(struct DjinniRecordHandle *)")
+    def get_rc_f4(cself):
         try:
-            with CPyBinary.fromPy(CPyRecord.toPy(None, cself).e) as py_obj:
-                _ret = py_obj.release_djinni_binary()
+            with CPyString.fromPy(CPyRecord.toPy(None, cself).d) as py_obj:
+                _ret = py_obj.release_djinni_string()
                 assert _ret != ffi.NULL
                 return _ret
         except Exception as _djinni_py_e:
             CPyException.setExceptionFromPy(_djinni_py_e)
             return ffi.NULL
 
-    @ffi.callback("struct DjinniRecordHandle *(int32_t,int32_t,struct DjinniBoxedI32 *,int,struct DjinniBinary *)")
-    def python_create_rc(a,b,c,d,e):
+    @ffi.callback("struct DjinniObjectHandle *(struct DjinniRecordHandle *)")
+    def get_rc_f5(cself):
+        try:
+            _ret = CPyObject.fromPy(ListInt32THelper.c_data_set, CPyRecord.toPy(None, cself).list)
+            assert _ret != ffi.NULL
+            return _ret
+        except Exception as _djinni_py_e:
+            CPyException.setExceptionFromPy(_djinni_py_e)
+            return ffi.NULL
+
+    @ffi.callback("struct DjinniRecordHandle *(int32_t,int32_t,uint32_t,struct DjinniString *,struct DjinniObjectHandle *)")
+    def python_create_rc(a,b,c,d,list):
         py_rec = Rc(
             CPyPrimitive.toPy(a),
             CPyPrimitive.toPy(b),
-            CPyBoxedI32.toPyOpt(c),
-            CPyEnum.toPy(MyEnum, d),
-            CPyBinary.toPy(e))
+            CPyPrimitive.toPy(c),
+            CPyString.toPy(d),
+            CPyObject.toPy(ListInt32THelper.c_data_set, list))
         return CPyRecord.fromPy(Rc.c_data_set, py_rec) #to do: can be optional?
 
     @ffi.callback("void (struct DjinniRecordHandle *)")

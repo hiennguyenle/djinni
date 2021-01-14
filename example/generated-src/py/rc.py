@@ -3,7 +3,14 @@
 
 from djinni.support import MultiSet # default imported in all files
 from djinni.exception import CPyException # default imported in all files
-from djinni.pycffi_marshal import CPyPrimitive, CPyRecord
+from djinni.pycffi_marshal import CPyObject, CPyPrimitive, CPyRecord, CPyString
+
+from dh__list_int16_t import ListInt16THelper
+from dh__list_int32_t import ListInt32THelper
+from dh__list_int8_t import ListInt8THelper
+from dh__list_record_hien import ListRecordHienHelper
+from hien import Hien
+from hien_helper import HienHelper
 from PyCFFIlib_cffi import ffi, lib
 
 from djinni import exception # this forces run of __init__.py which gives cpp option to call back into py to create exception
@@ -14,8 +21,19 @@ class Rc:
     @staticmethod
     def check_c_data_set_empty():
         assert len(Rc.c_data_set) == 0
+        ListInt16THelper.check_c_data_set_empty()
+        ListInt32THelper.check_c_data_set_empty()
+        ListInt8THelper.check_c_data_set_empty()
+        ListRecordHienHelper.check_c_data_set_empty()
 
 
-    def __init__(self, a):
+    def __init__(self, a, b, c, d, list16, list, list8, listHien):
         self.a = a
+        self.b = b
+        self.c = c
+        self.d = d
+        self.list16 = list16
+        self.list = list
+        self.list8 = list8
+        self.listHien = listHien
 

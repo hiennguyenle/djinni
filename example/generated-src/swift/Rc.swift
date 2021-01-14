@@ -10,21 +10,33 @@ import Foundation
 
     public let b : Int32
 
-    public let c : Int32?
+    public let c : UInt32
 
-    public let d : MyEnum
+    public let d : String
 
-    public let e : Data
+    public let list16 : Array<Int16>
+
+    public let list : Array<Int32>
+
+    public let list8 : Array<Int8>
+
+    public let listHien : Array<Hien>
 
     public init(a: Int32,
                 b: Int32,
-                c: Int32?,
-                d: MyEnum,
-                e: Data) {
+                c: UInt32,
+                d: String,
+                list16: Array<Int16>,
+                list: Array<Int32>,
+                list8: Array<Int8>,
+                listHien: Array<Hien>) {
         self.a = a
         self.b = b
         self.c = c
         self.d = d
-        self.e = e
+        self.list16 = list16
+        self.list = list
+        self.list8 = list8
+        self.listHien = listHien
     }
 }

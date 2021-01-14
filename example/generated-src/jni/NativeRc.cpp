@@ -4,7 +4,7 @@
 #include "NativeRc.hpp"  // my header
 #include "JNIMarshal+Json.h"
 #include "Marshal.hpp"
-#include "NativeMyEnum.hpp"
+#include "NativeHien.hpp"
 
 namespace djinni_generated {
 
@@ -17,22 +17,28 @@ auto NativeRc::fromCpp(JNIEnv* jniEnv, const CppType& c) -> ::djinni::LocalRef<J
     auto r = ::djinni::LocalRef<JniType>{jniEnv->NewObject(data.clazz.get(), data.jconstructor,
                                                            ::djinni::get(::djinni::I32::fromCpp(jniEnv, c.a)),
                                                            ::djinni::get(::djinni::I32::fromCpp(jniEnv, c.b)),
-                                                           ::djinni::get(::djinni::Optional<std::optional, ::djinni::I32>::fromCpp(jniEnv, c.c)),
-                                                           ::djinni::get(::djinni_generated::NativeMyEnum::fromCpp(jniEnv, c.d)),
-                                                           ::djinni::get(::djinni::Binary::fromCpp(jniEnv, c.e)))};
+                                                           ::djinni::get(::djinni::U32::fromCpp(jniEnv, c.c)),
+                                                           ::djinni::get(::djinni::String::fromCpp(jniEnv, c.d)),
+                                                           ::djinni::get(::djinni::List<::djinni::I16>::fromCpp(jniEnv, c.list_16)),
+                                                           ::djinni::get(::djinni::List<::djinni::I32>::fromCpp(jniEnv, c.list)),
+                                                           ::djinni::get(::djinni::List<::djinni::I8>::fromCpp(jniEnv, c.list8)),
+                                                           ::djinni::get(::djinni::List<::djinni_generated::NativeHien>::fromCpp(jniEnv, c.list_hien)))};
     ::djinni::jniExceptionCheck(jniEnv);
     return r;
 }
 
 auto NativeRc::toCpp(JNIEnv* jniEnv, JniType j) -> CppType {
-    ::djinni::JniLocalScope jscope(jniEnv, 6);
+    ::djinni::JniLocalScope jscope(jniEnv, 9);
     assert(j != nullptr);
     const auto& data = ::djinni::JniClass<NativeRc>::get();
     return {::djinni::I32::toCpp(jniEnv, jniEnv->GetIntField(j, data.field_mA)),
             ::djinni::I32::toCpp(jniEnv, jniEnv->GetIntField(j, data.field_mB)),
-            ::djinni::Optional<std::optional, ::djinni::I32>::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_mC)),
-            ::djinni_generated::NativeMyEnum::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_mD)),
-            ::djinni::Binary::toCpp(jniEnv, (jbyteArray)jniEnv->GetObjectField(j, data.field_mE))};
+            ::djinni::U32::toCpp(jniEnv, jniEnv->GetLongField(j, data.field_mC)),
+            ::djinni::String::toCpp(jniEnv, (jstring)jniEnv->GetObjectField(j, data.field_mD)),
+            ::djinni::List<::djinni::I16>::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_mList16)),
+            ::djinni::List<::djinni::I32>::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_mList)),
+            ::djinni::List<::djinni::I8>::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_mList8)),
+            ::djinni::List<::djinni_generated::NativeHien>::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_mListHien))};
 }
 
 }  // namespace djinni_generated

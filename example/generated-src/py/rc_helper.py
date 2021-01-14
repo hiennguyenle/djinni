@@ -3,7 +3,14 @@
 
 from djinni.support import MultiSet # default imported in all files
 from djinni.exception import CPyException # default imported in all files
-from djinni.pycffi_marshal import CPyPrimitive, CPyRecord
+from djinni.pycffi_marshal import CPyObject, CPyPrimitive, CPyRecord, CPyString
+
+from dh__list_int16_t import ListInt16THelper
+from dh__list_int32_t import ListInt32THelper
+from dh__list_int8_t import ListInt8THelper
+from dh__list_record_hien import ListRecordHienHelper
+from hien import Hien
+from hien_helper import HienHelper
 from PyCFFIlib_cffi import ffi, lib
 
 from djinni import exception # this forces run of __init__.py which gives cpp option to call back into py to create exception
@@ -25,10 +32,86 @@ class RcHelper:
             CPyException.setExceptionFromPy(_djinni_py_e)
             return ffi.NULL
 
-    @ffi.callback("struct DjinniRecordHandle *(int32_t)")
-    def python_create_rc(a):
+    @ffi.callback("int32_t(struct DjinniRecordHandle *)")
+    def get_rc_f2(cself):
+        try:
+            _ret = CPyPrimitive.fromPy(CPyRecord.toPy(None, cself).b)
+            return _ret
+        except Exception as _djinni_py_e:
+            CPyException.setExceptionFromPy(_djinni_py_e)
+            return ffi.NULL
+
+    @ffi.callback("uint32_t(struct DjinniRecordHandle *)")
+    def get_rc_f3(cself):
+        try:
+            _ret = CPyPrimitive.fromPy(CPyRecord.toPy(None, cself).c)
+            return _ret
+        except Exception as _djinni_py_e:
+            CPyException.setExceptionFromPy(_djinni_py_e)
+            return ffi.NULL
+
+    @ffi.callback("struct DjinniString *(struct DjinniRecordHandle *)")
+    def get_rc_f4(cself):
+        try:
+            with CPyString.fromPy(CPyRecord.toPy(None, cself).d) as py_obj:
+                _ret = py_obj.release_djinni_string()
+                assert _ret != ffi.NULL
+                return _ret
+        except Exception as _djinni_py_e:
+            CPyException.setExceptionFromPy(_djinni_py_e)
+            return ffi.NULL
+
+    @ffi.callback("struct DjinniObjectHandle *(struct DjinniRecordHandle *)")
+    def get_rc_f5(cself):
+        try:
+            _ret = CPyObject.fromPy(ListInt16THelper.c_data_set, CPyRecord.toPy(None, cself).list16)
+            assert _ret != ffi.NULL
+            return _ret
+        except Exception as _djinni_py_e:
+            CPyException.setExceptionFromPy(_djinni_py_e)
+            return ffi.NULL
+
+    @ffi.callback("struct DjinniObjectHandle *(struct DjinniRecordHandle *)")
+    def get_rc_f6(cself):
+        try:
+            _ret = CPyObject.fromPy(ListInt32THelper.c_data_set, CPyRecord.toPy(None, cself).list)
+            assert _ret != ffi.NULL
+            return _ret
+        except Exception as _djinni_py_e:
+            CPyException.setExceptionFromPy(_djinni_py_e)
+            return ffi.NULL
+
+    @ffi.callback("struct DjinniObjectHandle *(struct DjinniRecordHandle *)")
+    def get_rc_f7(cself):
+        try:
+            _ret = CPyObject.fromPy(ListInt8THelper.c_data_set, CPyRecord.toPy(None, cself).list8)
+            assert _ret != ffi.NULL
+            return _ret
+        except Exception as _djinni_py_e:
+            CPyException.setExceptionFromPy(_djinni_py_e)
+            return ffi.NULL
+
+    @ffi.callback("struct DjinniObjectHandle *(struct DjinniRecordHandle *)")
+    def get_rc_f8(cself):
+        try:
+            _ret = CPyObject.fromPy(ListRecordHienHelper.c_data_set, CPyRecord.toPy(None, cself).listHien)
+            assert _ret != ffi.NULL
+            return _ret
+        except Exception as _djinni_py_e:
+            CPyException.setExceptionFromPy(_djinni_py_e)
+            return ffi.NULL
+
+    @ffi.callback("struct DjinniRecordHandle *(int32_t,int32_t,uint32_t,struct DjinniString *,struct DjinniObjectHandle *,struct DjinniObjectHandle *,struct DjinniObjectHandle *,struct DjinniObjectHandle *)")
+    def python_create_rc(a,b,c,d,list16,list,list8,listHien):
         py_rec = Rc(
-            CPyPrimitive.toPy(a))
+            CPyPrimitive.toPy(a),
+            CPyPrimitive.toPy(b),
+            CPyPrimitive.toPy(c),
+            CPyString.toPy(d),
+            CPyObject.toPy(ListInt16THelper.c_data_set, list16),
+            CPyObject.toPy(ListInt32THelper.c_data_set, list),
+            CPyObject.toPy(ListInt8THelper.c_data_set, list8),
+            CPyObject.toPy(ListRecordHienHelper.c_data_set, listHien))
         return CPyRecord.fromPy(Rc.c_data_set, py_rec) #to do: can be optional?
 
     @ffi.callback("void (struct DjinniRecordHandle *)")
@@ -40,7 +123,14 @@ class RcHelper:
     def _add_callbacks():
         lib.rc_add_callback_get_rc_f1(RcHelper.get_rc_f1)
         lib.rc_add_callback_python_create_rc(RcHelper.python_create_rc)
+        lib.rc_add_callback_get_rc_f5(RcHelper.get_rc_f5)
+        lib.rc_add_callback_get_rc_f2(RcHelper.get_rc_f2)
+        lib.rc_add_callback_get_rc_f6(RcHelper.get_rc_f6)
+        lib.rc_add_callback_get_rc_f3(RcHelper.get_rc_f3)
         lib.rc_add_callback___delete(RcHelper.__delete)
+        lib.rc_add_callback_get_rc_f7(RcHelper.get_rc_f7)
+        lib.rc_add_callback_get_rc_f4(RcHelper.get_rc_f4)
+        lib.rc_add_callback_get_rc_f8(RcHelper.get_rc_f8)
 
 RcHelper._add_callbacks()
 

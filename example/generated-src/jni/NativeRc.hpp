@@ -10,7 +10,7 @@ namespace djinni_generated {
 
 class NativeRc final {
 public:
-    using CppType = ::textsort::Rc;
+    using CppType = ::cpp_generated::Rc;
     using JniType = jobject;
 
     using Boxed = NativeRc;
@@ -24,13 +24,16 @@ private:
     NativeRc();
     friend ::djinni::JniClass<NativeRc>;
 
-    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("com/dropbox/textsort/Rc") };
-    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(IILjava/lang/Integer;Lcom/dropbox/textsort/MyEnum;[B)V") };
+    const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("demo/auto/gen/Rc") };
+    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(IIJLjava/lang/String;Ljava/util/ArrayList;Ljava/util/ArrayList;Ljava/util/ArrayList;Ljava/util/ArrayList;)V") };
     const jfieldID field_mA { ::djinni::jniGetFieldID(clazz.get(), "mA", "I") };
     const jfieldID field_mB { ::djinni::jniGetFieldID(clazz.get(), "mB", "I") };
-    const jfieldID field_mC { ::djinni::jniGetFieldID(clazz.get(), "mC", "Ljava/lang/Integer;") };
-    const jfieldID field_mD { ::djinni::jniGetFieldID(clazz.get(), "mD", "Lcom/dropbox/textsort/MyEnum;") };
-    const jfieldID field_mE { ::djinni::jniGetFieldID(clazz.get(), "mE", "[B") };
+    const jfieldID field_mC { ::djinni::jniGetFieldID(clazz.get(), "mC", "J") };
+    const jfieldID field_mD { ::djinni::jniGetFieldID(clazz.get(), "mD", "Ljava/lang/String;") };
+    const jfieldID field_mList16 { ::djinni::jniGetFieldID(clazz.get(), "mList16", "Ljava/util/ArrayList;") };
+    const jfieldID field_mList { ::djinni::jniGetFieldID(clazz.get(), "mList", "Ljava/util/ArrayList;") };
+    const jfieldID field_mList8 { ::djinni::jniGetFieldID(clazz.get(), "mList8", "Ljava/util/ArrayList;") };
+    const jfieldID field_mListHien { ::djinni::jniGetFieldID(clazz.get(), "mListHien", "Ljava/util/ArrayList;") };
 };
 
 }  // namespace djinni_generated
