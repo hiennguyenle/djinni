@@ -53,8 +53,7 @@ class CgoWrapperMarshal(spec: Spec) extends Marshal(spec) { // modeled(pretty mu
                 }
                 case d: MDef =>
                     d.defType match {
-                        case DEnum => "int"
-                        case DRecord => cgo + d.name
+                        case DEnum | DRecord => cgo + d.name
                         case DInterface => structPrefix + djinniWrapper + idCpp.ty(d.name) + " *"
                     }
                 case p: MParam => idCpp.typeParam(p.name)
@@ -82,7 +81,7 @@ class CgoWrapperMarshal(spec: Spec) extends Marshal(spec) { // modeled(pretty mu
         case d: MDef => d.defType match {
             case DInterface => List(ImportRef(q(cgo + d.name + ".h")))
             case DRecord => List(ImportRef(q(cgo + d.name + ".h")))
-            case DEnum => List(ImportRef(q(d.name + ".h")), ImportRef(q(cgo + d.name + ".h")))
+            case DEnum => List(ImportRef(q(cgo + d.name + ".h")))
         }
         case e: MExtern => throw new NotImplementedError()
         case _ => List()
@@ -160,7 +159,9 @@ class CgoWrapperMarshal(spec: Spec) extends Marshal(spec) { // modeled(pretty mu
             }
             case MParam(name) => throw new NotImplementedError()
             case d: MDef => d.defType match {
-                case meta.DEnum => throw new NotImplementedError()
+                case meta.DEnum =>
+                    val cppHelperClass = s"$djinniWrapper" + idCpp.typeParam(cgo + d.name)
+                    s"$cppHelperClass::from_cpp($expr)"
                 case meta.DInterface => throw new NotImplementedError()
                 case meta.DRecord =>
                     val cppHelperClass = s"$djinniWrapper" + idCpp.typeParam(cgo + d.name)
@@ -194,7 +195,9 @@ class CgoWrapperMarshal(spec: Spec) extends Marshal(spec) { // modeled(pretty mu
             }
             case MParam(name) => throw new NotImplementedError()
             case d: MDef => d.defType match {
-                case meta.DEnum => throw new NotImplementedError()
+                case meta.DEnum =>
+                    val cppHelperClass = s"$djinniWrapper" + idCpp.typeParam(cgo + d.name)
+                    s"$cppHelperClass::to_cpp($expr)"
                 case meta.DInterface => throw new NotImplementedError()
                 case meta.DRecord =>
                     val cppHelperClass = s"$djinniWrapper" + idCpp.typeParam(cgo + d.name)

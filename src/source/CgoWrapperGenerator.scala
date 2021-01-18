@@ -141,7 +141,7 @@ class CgoWrapperGenerator(spec: Spec) extends Generator(spec) {
               val className = "DjinniCgo" + idCpp.typeParam(d.name)
               w.wl(s"$cpp_type_name cpp = $cpp_type_name(cgo.length);")
               w.wl(s"for (int i = 0; i < cpp.size(); i++)").braced {
-                w.wl(s"cpp[i] = ${className}::to_cpp(cgo.data[i]);")
+                w.wl(s"cpp[i] = $className::to_cpp(cgo.data[i]);")
               }
               w.wl(s"return cpp;")
             case DEnum => throw new NotImplementedError()
@@ -213,7 +213,67 @@ class CgoWrapperGenerator(spec: Spec) extends Generator(spec) {
   }
 
   def generateEnum(origin: String, ident: djinni.ast.Ident, doc: djinni.ast.Doc, e: djinni.ast.Enum, deprecated: Option[djinni.ast.Deprecated]) {
+    val refs = new CppRefs(ident, origin)
+    // Include cpp header
+    refs.hpp.add("#include " + q(ident.name + ".hpp"))
+    refs.hpp.add("#include " + marshal.cHeader(ident))
+    refs.hpp.add("#include <optional>")
+    refs.cpp.add("#include " + marshal.cppHeader(ident))
 
+    val fileName = marshal.cgo + ident.name
+    val className = "Djinni" + idCpp.ty(fileName)
+    val skipFirst = SkipFirst()
+
+    writeCHeader(fileName, origin, "", refs.h, create = true, ".h", w => {
+      w.w(s"typedef enum").braced {
+        for (o <- e.options) {
+          skipFirst {
+            w.wl(",")
+          }
+          w.w(s"${o.ident.name}")
+        }
+      }
+      w.wl(s"$fileName;")
+    })
+
+    val cpp_type_name = cppMarshal.fqTypename(ident, e)
+    val cgo_type_name = marshal.cgo + ident.name
+
+    writeCHeader(fileName, origin, "", refs.hpp, create = true, ".hpp", w => {
+      w.wl(s"struct $className").bracedSemi {
+        w.wl(s"static $cgo_type_name from_cpp(const $cpp_type_name & cpp);")
+        w.wl(s"static $cpp_type_name to_cpp(const $cgo_type_name & cgo);")
+        w.wl(s"static std::optional<$cgo_type_name> from_cpp(const std::optional<$cpp_type_name> & cpp);")
+        w.wl(s"static std::optional<$cpp_type_name> to_cpp($cgo_type_name * cgo);")
+      }
+    })
+
+    writeCFile(fileName, origin, "", refs.cpp, create = true, w => {
+      w.wl
+      w.wl(s"$fileName $className::from_cpp(const $cpp_type_name & cpp)").bracedSemi {
+        w.wl(s"return static_cast<$fileName>(cpp);")
+      }
+      w.wl
+      w.wl(s"$cpp_type_name $className::to_cpp(const $fileName & cgo)").bracedSemi {
+        w.wl(s"return static_cast<$cpp_type_name>(cgo);")
+      }
+      // Optional
+      w.wl
+      w.wl(s"std::optional<$cgo_type_name> $className::from_cpp(const std::optional<$cpp_type_name> & cpp)").bracedSemi {
+        w.wl(s"if (cpp.has_value())").braced {
+          w.wl(s"return $className::from_cpp(cpp.value());")
+        }
+        w.wl("return std::nullopt;")
+      }
+
+      w.wl
+      w.wl(s"std::optional<$cpp_type_name> $className::to_cpp($cgo_type_name * cgo)").bracedSemi {
+        w.wl(s"if (cgo != NULL)").braced {
+          w.wl(s"return $className::to_cpp(cgo);")
+        }
+        w.wl("return std::nullopt;")
+      }
+    })
   }
 
   def generateInterface(origin: String, ident: djinni.ast.Ident, doc: djinni.ast.Doc, typeParams: Seq[djinni.ast.TypeParam], i: djinni.ast.Interface, deprecated: Option[djinni.ast.Deprecated]) {
@@ -320,7 +380,6 @@ class CgoWrapperGenerator(spec: Spec) extends Generator(spec) {
         }
         w.wl("return std::nullopt;")
       }
-
     })
 
   }
