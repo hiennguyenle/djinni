@@ -3,12 +3,15 @@
 
 #include "cgo_wrapper_marshal.hpp"
 
+#include "cgo__en.hpp"
 #include "cgo__hien.hpp"
 #include "cgo__list__cgo__hien.hpp"
 #include "cgo__list__int16_t.hpp"
 #include "cgo__list__int32_t.hpp"
 #include "cgo__list__int8_t.hpp"
+#include "en.hpp"
 #include "hien.hpp"
+#include <optional>
 #include <stdint.h>
 #include <string>
 

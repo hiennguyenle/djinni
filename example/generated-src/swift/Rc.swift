@@ -22,6 +22,14 @@ import Foundation
 
     public let listHien : Array<Hien>
 
+    public let o : UInt16?
+
+    public let o1 : Hien?
+
+    public let e1 : En
+
+    public let e2 : En?
+
     public init(a: Int32,
                 b: Int32,
                 c: UInt32,
@@ -29,7 +37,11 @@ import Foundation
                 list16: Array<Int16>,
                 list: Array<Int32>,
                 list8: Array<Int8>,
-                listHien: Array<Hien>) {
+                listHien: Array<Hien>,
+                o: UInt16?,
+                o1: Hien?,
+                e1: En,
+                e2: En?) {
         self.a = a
         self.b = b
         self.c = c
@@ -38,5 +50,9 @@ import Foundation
         self.list = list
         self.list8 = list8
         self.listHien = listHien
+        self.o = o
+        self.o1 = o1
+        self.e1 = e1
+        self.e2 = e2
     }
 }

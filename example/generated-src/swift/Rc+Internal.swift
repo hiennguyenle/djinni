@@ -54,6 +54,30 @@ extension Rc  {
         }
     }
     @available(swift, obsoleted: 1.0)
+    @objc public var __djinni__objc_o: NSNumber? {
+        get {
+            return DjinniSwift.U16.toObjc(e: o)
+        }
+    }
+    @available(swift, obsoleted: 1.0)
+    @objc public var __djinni__objc_o1: Hien? {
+        get {
+            return o1
+        }
+    }
+    @available(swift, obsoleted: 1.0)
+    @objc public var __djinni__objc_e1: En {
+        get {
+            return e1
+        }
+    }
+    @available(swift, obsoleted: 1.0)
+    @objc public var __djinni__objc_e2: NSNumber? {
+        get {
+            return DjinniSwift.Enum<En>.toObjc(e: e2)
+        }
+    }
+    @available(swift, obsoleted: 1.0)
     @objc public static func `init`(a: Int32,
                                     b: Int32,
                                     c: UInt32,
@@ -61,7 +85,11 @@ extension Rc  {
                                     list16: Array<Int16>,
                                     list: Array<Int32>,
                                     list8: Array<Int8>,
-                                    listHien: Array<Hien>) -> Rc {
+                                    listHien: Array<Hien>,
+                                    o: NSNumber?,
+                                    o1: Hien?,
+                                    e1: En,
+                                    e2: NSNumber?) -> Rc {
         return Rc.init(a: a,
                        b: b,
                        c: c,
@@ -69,5 +97,9 @@ extension Rc  {
                        list16: list16,
                        list: list,
                        list8: list8,
-                       listHien: listHien)}
+                       listHien: listHien,
+                       o: DjinniSwift.U16.fromObjc(e: o),
+                       o1: o1,
+                       e1: e1,
+                       e2: DjinniSwift.Enum<En>.fromObjc(e: e2))}
 }

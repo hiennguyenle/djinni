@@ -5,6 +5,7 @@
 
 #include "cgo_wrapper_marshal.h"
 
+#include "cgo__en.h"
 #include "cgo__hien.h"
 #include "cgo__list__cgo__hien.h"
 #include "cgo__list__int16_t.h"

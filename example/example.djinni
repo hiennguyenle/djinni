@@ -3,6 +3,12 @@ hien = record {
     val: i8;
 }
 
+en = enum {
+    a;
+    b;
+    c;
+}
+
 rc = record {
     a: i32;
     b: i32;
@@ -12,4 +18,8 @@ rc = record {
     list: list<i32>;
     list8: list<i8>;
     list_hien: list<hien>;
+    o: optional<u16>;
+    o1: optional<hien>;
+    e1: en;
+    e2: optional<en>;
 }

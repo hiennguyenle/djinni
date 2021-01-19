@@ -25,7 +25,7 @@ private:
     friend ::djinni::JniClass<NativeRc>;
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("demo/auto/gen/Rc") };
-    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(IIJLjava/lang/String;Ljava/util/ArrayList;Ljava/util/ArrayList;Ljava/util/ArrayList;Ljava/util/ArrayList;)V") };
+    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(IIJLjava/lang/String;Ljava/util/ArrayList;Ljava/util/ArrayList;Ljava/util/ArrayList;Ljava/util/ArrayList;Ljava/lang/Integer;Ldemo/auto/gen/Hien;Ldemo/auto/gen/En;Ldemo/auto/gen/En;)V") };
     const jfieldID field_mA { ::djinni::jniGetFieldID(clazz.get(), "mA", "I") };
     const jfieldID field_mB { ::djinni::jniGetFieldID(clazz.get(), "mB", "I") };
     const jfieldID field_mC { ::djinni::jniGetFieldID(clazz.get(), "mC", "J") };
@@ -34,6 +34,10 @@ private:
     const jfieldID field_mList { ::djinni::jniGetFieldID(clazz.get(), "mList", "Ljava/util/ArrayList;") };
     const jfieldID field_mList8 { ::djinni::jniGetFieldID(clazz.get(), "mList8", "Ljava/util/ArrayList;") };
     const jfieldID field_mListHien { ::djinni::jniGetFieldID(clazz.get(), "mListHien", "Ljava/util/ArrayList;") };
+    const jfieldID field_mO { ::djinni::jniGetFieldID(clazz.get(), "mO", "Ljava/lang/Integer;") };
+    const jfieldID field_mO1 { ::djinni::jniGetFieldID(clazz.get(), "mO1", "Ldemo/auto/gen/Hien;") };
+    const jfieldID field_mE1 { ::djinni::jniGetFieldID(clazz.get(), "mE1", "Ldemo/auto/gen/En;") };
+    const jfieldID field_mE2 { ::djinni::jniGetFieldID(clazz.get(), "mE2", "Ldemo/auto/gen/En;") };
 };
 
 }  // namespace djinni_generated

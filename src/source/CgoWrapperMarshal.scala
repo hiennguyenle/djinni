@@ -46,7 +46,7 @@ class CgoWrapperMarshal(spec: Spec) extends Marshal(spec) { // modeled(pretty mu
                     case MList | MSet | MMap => structPrefix + "DjinniOptionalObjectHandle *"
                     case d: MDef =>
                         d.defType match {
-                            case DRecord => s"$cgo${d.name} *"
+                            case DRecord | DEnum => s"$cgo${d.name} *"
                             case _ => base(tm.args.head.base)
                         }
                     case _ => base(tm.args.head.base)
@@ -112,9 +112,8 @@ class CgoWrapperMarshal(spec: Spec) extends Marshal(spec) { // modeled(pretty mu
             case p: MPrimitive => p.cName
             case d: MDef =>
                 d.defType match {
-                    case DRecord => cgo + d.name
+                    case DRecord | DEnum => cgo + d.name
                     case DInterface => "interface_" + d.name
-                    case DEnum => "enum_" + d.name
                 }
             case p: MParam => idCpp.typeParam(p.name)
             case e: MExtern => "extern"

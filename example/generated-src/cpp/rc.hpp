@@ -3,8 +3,10 @@
 
 #pragma once
 
+#include "en.hpp"
 #include "hien.hpp"
 #include <cstdint>
+#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
@@ -20,6 +22,10 @@ struct  Rc {
     std::vector<int32_t> list;
     std::vector<int8_t> list8;
     std::vector<Hien> list_hien;
+    std::optional<uint16_t> o;
+    std::optional<Hien> o1;
+    En e1;
+    std::optional<En> e2;
 
     Rc(int32_t a_,
        int32_t b_,
@@ -28,7 +34,11 @@ struct  Rc {
        std::vector<int16_t> list_16_,
        std::vector<int32_t> list_,
        std::vector<int8_t> list8_,
-       std::vector<Hien> list_hien_)
+       std::vector<Hien> list_hien_,
+       std::optional<uint16_t> o_,
+       std::optional<Hien> o1_,
+       En e1_,
+       std::optional<En> e2_)
     : a(std::move(a_))
     , b(std::move(b_))
     , c(std::move(c_))
@@ -37,6 +47,10 @@ struct  Rc {
     , list(std::move(list_))
     , list8(std::move(list8_))
     , list_hien(std::move(list_hien_))
+    , o(std::move(o_))
+    , o1(std::move(o1_))
+    , e1(std::move(e1_))
+    , e2(std::move(e2_))
     {}
 
     Rc() = default;

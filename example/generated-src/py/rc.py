@@ -3,12 +3,13 @@
 
 from djinni.support import MultiSet # default imported in all files
 from djinni.exception import CPyException # default imported in all files
-from djinni.pycffi_marshal import CPyObject, CPyPrimitive, CPyRecord, CPyString
+from djinni.pycffi_marshal import CPyBoxedU16, CPyEnum, CPyObject, CPyPrimitive, CPyRecord, CPyString
 
 from dh__list_int16_t import ListInt16THelper
 from dh__list_int32_t import ListInt32THelper
 from dh__list_int8_t import ListInt8THelper
 from dh__list_record_hien import ListRecordHienHelper
+from en import En
 from hien import Hien
 from hien_helper import HienHelper
 from PyCFFIlib_cffi import ffi, lib
@@ -25,9 +26,10 @@ class Rc:
         ListInt32THelper.check_c_data_set_empty()
         ListInt8THelper.check_c_data_set_empty()
         ListRecordHienHelper.check_c_data_set_empty()
+        En.check_c_data_set_empty()
 
 
-    def __init__(self, a, b, c, d, list16, list, list8, listHien):
+    def __init__(self, a, b, c, d, list16, list, list8, listHien, o, o1, e1, e2):
         self.a = a
         self.b = b
         self.c = c
@@ -36,4 +38,8 @@ class Rc:
         self.list = list
         self.list8 = list8
         self.listHien = listHien
+        self.o = o
+        self.o1 = o1
+        self.e1 = e1
+        self.e2 = e2
 

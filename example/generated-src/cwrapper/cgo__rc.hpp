@@ -5,14 +5,17 @@
 
 #include "cgo_wrapper_marshal.h"
 
+#include "cgo__en.hpp"
 #include "cgo__hien.hpp"
 #include "cgo__list__cgo__hien.hpp"
 #include "cgo__list__int16_t.hpp"
 #include "cgo__list__int32_t.hpp"
 #include "cgo__list__int8_t.hpp"
 #include "cgo__rc.h"
+#include "en.hpp"
 #include "hien.hpp"
 #include "rc.hpp"
+#include <optional>
 #include <stdint.h>
 #include <string>
 
@@ -20,4 +23,6 @@ struct DjinniCgoRc
 {
     static cgo__rc from_cpp(const ::cpp_generated::Rc & cpp);
     static ::cpp_generated::Rc to_cpp(const cgo__rc & cgo);
+    static std::optional<cgo__rc> from_cpp(const std::optional<::cpp_generated::Rc> & cpp);
+    static std::optional<::cpp_generated::Rc> to_cpp(cgo__rc * cgo);
 };

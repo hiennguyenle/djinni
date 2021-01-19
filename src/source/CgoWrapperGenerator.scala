@@ -230,7 +230,10 @@ class CgoWrapperGenerator(spec: Spec) extends Generator(spec) {
           skipFirst {
             w.wl(",")
           }
-          w.w(s"${o.ident.name}")
+          o.value match {
+            case Some(i)=> w.w(s"${o.ident.name} = $i")
+            case None => w.w(s"${o.ident.name}")
+          }
         }
       }
       w.wl(s"$fileName;")

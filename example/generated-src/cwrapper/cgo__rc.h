@@ -5,6 +5,7 @@
 
 #include "cgo_wrapper_marshal.h"
 
+#include "cgo__en.h"
 #include "cgo__hien.h"
 #include "cgo__list__cgo__hien.h"
 #include "cgo__list__int16_t.h"
@@ -25,6 +26,10 @@ typedef struct {
     cgo__list__int32_t list;
     cgo__list__int8_t list8;
     cgo__list__cgo__hien list_hien;
+    uint16_t * o;
+    cgo__hien * o1;
+    cgo__en e1;
+    cgo__en * e2;
 }
 cgo__rc;
 

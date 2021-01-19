@@ -1,18 +1,18 @@
 /**
-  * Copyright 2014 Dropbox, Inc.
-  *
-  * Licensed under the Apache License, Version 2.0 (the "License");
-  * you may not use this file except in compliance with the License.
-  * You may obtain a copy of the License at
-  *
-  * http://www.apache.org/licenses/LICENSE-2.0
-  *
-  * Unless required by applicable law or agreed to in writing, software
-  * distributed under the License is distributed on an "AS IS" BASIS,
-  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  * See the License for the specific language governing permissions and
-  * limitations under the License.
-  */
+ * Copyright 2014 Dropbox, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package djinni
 
@@ -98,7 +98,7 @@ package object generatorTools {
         }
         new YamlGenerator(spec).generate(idl)
       }
-      
+
       if (spec.pyOutFolder.isDefined) {
         DEBUG(spec.pyOutFolder.get.toString)
         if (!spec.skipGeneration) {
@@ -324,6 +324,7 @@ package object generatorTools {
       }
     }
   }
+
 }
 
 object Generator {
@@ -458,10 +459,9 @@ abstract class Generator(spec: Spec) {
     def superFieldsAccumulator(r: Record, fields: Seq[Field]): Seq[Field] = {
       r.baseRecord match {
         case None => r.fields ++ fields
-        case Some(value) => {
+        case Some(_) =>
           val baseRecord = getSuperRecord(idl, r).get
           superFieldsAccumulator(baseRecord.record, r.fields)
-        }
       }
     }
 
@@ -476,7 +476,7 @@ abstract class Generator(spec: Spec) {
           case Some(superDec) => superDec.body match {
             case superRecord: Record => {
               val superFields = collectSuperFields(idl, superRecord)
-              return Some(SuperRecord(superDec.ident, superRecord, superFields))
+              Some(SuperRecord(superDec.ident, superRecord, superFields))
             }
             case _ => throw new AssertionError("Unreachable. The parser throws an exception when extending a non-interface type.")
           }
@@ -506,7 +506,8 @@ abstract class Generator(spec: Spec) {
     val skipFirst = new SkipFirst
     params.foreach(p => {
       skipFirst {
-        w.wl(delim); w.w(" " * call.length())
+        w.wl(delim);
+        w.w(" " * call.length())
       }
       w.w(f(p))
     })
@@ -519,7 +520,9 @@ abstract class Generator(spec: Spec) {
     params.foreach(p => {
       val (name, value) = f(p)
       skipFirst {
-        w.wl; w.w(" " * math.max(0, call.length() - name.length)); w.w(name)
+        w.wl;
+        w.w(" " * math.max(0, call.length() - name.length));
+        w.w(name)
       }
       w.w(":" + value)
     })
@@ -539,7 +542,7 @@ abstract class Generator(spec: Spec) {
     for (o <- normalEnumOptions(e)) {
       writeDoc(w, o.doc)
       if (o.value != None) {
-        var constValue = o.value match {
+        val constValue = o.value match {
           case Some(i) => " = " + i + ","
         }
         w.w(ident(o.ident.name) + " ")

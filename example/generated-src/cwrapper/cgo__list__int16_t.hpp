@@ -5,6 +5,8 @@
 
 #include "cgo_wrapper_marshal.h"
 
+#include "cgo__en.h"
+#include "cgo__en.hpp"
 #include "cgo__hien.h"
 #include "cgo__hien.hpp"
 #include "cgo__list__cgo__hien.h"
@@ -15,7 +17,9 @@
 #include "cgo__list__int32_t.hpp"
 #include "cgo__list__int8_t.h"
 #include "cgo__list__int8_t.hpp"
+#include "en.hpp"
 #include "hien.hpp"
+#include <optional>
 #include <stdint.h>
 #include <string>
 

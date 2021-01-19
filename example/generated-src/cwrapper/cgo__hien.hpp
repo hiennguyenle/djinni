@@ -7,10 +7,13 @@
 
 #include "cgo__hien.h"
 #include "hien.hpp"
+#include <optional>
 #include <stdint.h>
 
 struct DjinniCgoHien
 {
     static cgo__hien from_cpp(const ::cpp_generated::Hien & cpp);
     static ::cpp_generated::Hien to_cpp(const cgo__hien & cgo);
+    static std::optional<cgo__hien> from_cpp(const std::optional<::cpp_generated::Hien> & cpp);
+    static std::optional<::cpp_generated::Hien> to_cpp(cgo__hien * cgo);
 };

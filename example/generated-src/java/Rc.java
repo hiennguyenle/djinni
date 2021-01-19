@@ -26,6 +26,14 @@ public class Rc {
 
     /*package*/ final ArrayList<Hien> mListHien;
 
+    /*package*/ final Integer mO;
+
+    /*package*/ final Hien mO1;
+
+    /*package*/ final En mE1;
+
+    /*package*/ final En mE2;
+
     public Rc(
             int a,
             int b,
@@ -34,7 +42,11 @@ public class Rc {
             @NonNull ArrayList<Short> list16,
             @NonNull ArrayList<Integer> list,
             @NonNull ArrayList<Byte> list8,
-            @NonNull ArrayList<Hien> listHien) {
+            @NonNull ArrayList<Hien> listHien,
+            @Nullable Integer o,
+            @Nullable Hien o1,
+            @NonNull En e1,
+            @Nullable En e2) {
         this.mA = a;
         this.mB = b;
         this.mC = c;
@@ -43,6 +55,10 @@ public class Rc {
         this.mList = list;
         this.mList8 = list8;
         this.mListHien = listHien;
+        this.mO = o;
+        this.mO1 = o1;
+        this.mE1 = e1;
+        this.mE2 = e2;
     }
 
     public int getA() {
@@ -82,6 +98,26 @@ public class Rc {
         return mListHien;
     }
 
+    @Nullable
+    public Integer getO() {
+        return mO;
+    }
+
+    @Nullable
+    public Hien getO1() {
+        return mO1;
+    }
+
+    @NonNull
+    public En getE1() {
+        return mE1;
+    }
+
+    @Nullable
+    public En getE2() {
+        return mE2;
+    }
+
     @Override
     public String toString() {
         return "Rc{" +
@@ -93,6 +129,10 @@ public class Rc {
                 "," + "mList=" + mList +
                 "," + "mList8=" + mList8 +
                 "," + "mListHien=" + mListHien +
+                "," + "mO=" + mO +
+                "," + "mO1=" + mO1 +
+                "," + "mE1=" + mE1 +
+                "," + "mE2=" + mE2 +
         "}";
     }
 

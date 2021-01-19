@@ -12,11 +12,15 @@ cgo__rc DjinniCgoRc::from_cpp(const ::cpp_generated::Rc & cpp)
         std::move(cpp.a),
         std::move(cpp.b),
         std::move(cpp.c),
-        DjinniString::from_cpp(std::move(cpp.d)),
-        DjinniCgoListInt16T::from_cpp(std::move(cpp.list_16)),
-        DjinniCgoListInt32T::from_cpp(std::move(cpp.list)),
-        DjinniCgoListInt8T::from_cpp(std::move(cpp.list8)),
-        DjinniCgoListCgoHien::from_cpp(std::move(cpp.list_hien))};
+        DjinniString::from_cpp(cpp.d),
+        DjinniCgoListInt16T::from_cpp(cpp.list_16),
+        DjinniCgoListInt32T::from_cpp(cpp.list),
+        DjinniCgoListInt8T::from_cpp(cpp.list8),
+        DjinniCgoListCgoHien::from_cpp(cpp.list_hien),
+        DjinniCgoOptional<uint16_t>::from_cpp(std::move(cpp.o)),
+        DjinniCgoOptional<cgo__hien>::from_cpp(DjinniCgoHien::from_cpp(cpp.o1)),
+        DjinniCgoEn::from_cpp(cpp.e1),
+        DjinniCgoOptional<cgo__en>::from_cpp(DjinniCgoEn::from_cpp(cpp.e2))};
 };
 
 ::cpp_generated::Rc DjinniCgoRc::to_cpp(const cgo__rc & cgo)
@@ -26,9 +30,31 @@ cgo__rc DjinniCgoRc::from_cpp(const ::cpp_generated::Rc & cpp)
         std::move(cgo.a),
         std::move(cgo.b),
         std::move(cgo.c),
-        DjinniString::to_cpp(std::move(cgo.d)),
-        DjinniCgoListInt16T::to_cpp(std::move(cgo.list_16)),
-        DjinniCgoListInt32T::to_cpp(std::move(cgo.list)),
-        DjinniCgoListInt8T::to_cpp(std::move(cgo.list8)),
-        DjinniCgoListCgoHien::to_cpp(std::move(cgo.list_hien))};
+        DjinniString::to_cpp(cgo.d),
+        DjinniCgoListInt16T::to_cpp(cgo.list_16),
+        DjinniCgoListInt32T::to_cpp(cgo.list),
+        DjinniCgoListInt8T::to_cpp(cgo.list8),
+        DjinniCgoListCgoHien::to_cpp(cgo.list_hien),
+        DjinniCgoOptional<uint16_t>::to_cpp(std::move(cgo.o)),
+        DjinniCgoHien::to_cpp(cgo.o1),
+        DjinniCgoEn::to_cpp(cgo.e1),
+        DjinniCgoEn::to_cpp(cgo.e2)};
+};
+
+std::optional<cgo__rc> DjinniCgoRc::from_cpp(const std::optional<::cpp_generated::Rc> & cpp)
+{
+    if (cpp.has_value())
+    {
+        return DjinniCgoRc::from_cpp(cpp.value());
+    }
+    return std::nullopt;
+};
+
+std::optional<::cpp_generated::Rc> DjinniCgoRc::to_cpp(cgo__rc * cgo)
+{
+    if (cgo != NULL)
+    {
+        return DjinniCgoRc::to_cpp(cgo);
+    }
+    return std::nullopt;
 };

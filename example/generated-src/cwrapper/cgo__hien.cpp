@@ -18,3 +18,21 @@ cgo__hien DjinniCgoHien::from_cpp(const ::cpp_generated::Hien & cpp)
     {
         std::move(cgo.val)};
 };
+
+std::optional<cgo__hien> DjinniCgoHien::from_cpp(const std::optional<::cpp_generated::Hien> & cpp)
+{
+    if (cpp.has_value())
+    {
+        return DjinniCgoHien::from_cpp(cpp.value());
+    }
+    return std::nullopt;
+};
+
+std::optional<::cpp_generated::Hien> DjinniCgoHien::to_cpp(cgo__hien * cgo)
+{
+    if (cgo != NULL)
+    {
+        return DjinniCgoHien::to_cpp(cgo);
+    }
+    return std::nullopt;
+};
