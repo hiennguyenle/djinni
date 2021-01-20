@@ -43,11 +43,11 @@ class CppGenerator(spec: Spec) extends Generator(spec) {
     }
 
     def find(tm: MExpr, forwardDeclareOnly: Boolean) {
-      tm.args.foreach((x) => find(x, forwardDeclareOnly))
+      tm.args.foreach(x => find(x, forwardDeclareOnly))
       find(tm.base, forwardDeclareOnly)
     }
 
-    def find(m: Meta, forwardDeclareOnly: Boolean) = {
+    def find(m: Meta, forwardDeclareOnly: Boolean): Unit = {
       for (r <- marshal.hppReferences(m, name, forwardDeclareOnly)) r match {
         case ImportRef(arg) => hpp.add("#include " + arg)
         case DeclRef(decl, Some(spec.cppNamespace)) => hppFwds.add(decl)
@@ -426,6 +426,7 @@ class CppGenerator(spec: Spec) extends Generator(spec) {
       m.params.foreach(p => refs.find(p.ty, forwardDeclareOnly = true))
       m.ret.foreach(x => refs.find(x, forwardDeclareOnly = true))
     })
+
     i.consts.foreach(c => {
       refs.find(c.ty, forwardDeclareOnly = true)
     })

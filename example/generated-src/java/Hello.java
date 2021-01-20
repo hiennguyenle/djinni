@@ -8,16 +8,18 @@ import androidx.annotation.Nullable;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class Hello {
-    @NonNull
-    public abstract MyEnum sayHi();
-
-    @NonNull
-    public abstract MyRecord print(@NonNull MyRecord rc);
+    public abstract void print(@NonNull Rc r);
 
     @NonNull
     public static Hello create()
     {
         return CppProxy.create();
+    }
+
+    @NonNull
+    public static Hello createWithRc(@NonNull Rc r)
+    {
+        return CppProxy.createWithRc(r);
     }
 
     private static final class CppProxy extends Hello
@@ -44,22 +46,17 @@ public abstract class Hello {
         }
 
         @Override
-        public MyEnum sayHi()
+        public void print(Rc r)
         {
             assert !this.destroyed.get() : "trying to use a destroyed object";
-            return native_sayHi(this.nativeRef);
+            native_print(this.nativeRef, r);
         }
-        private native MyEnum native_sayHi(long _nativeRef);
-
-        @Override
-        public MyRecord print(MyRecord rc)
-        {
-            assert !this.destroyed.get() : "trying to use a destroyed object";
-            return native_print(this.nativeRef, rc);
-        }
-        private native MyRecord native_print(long _nativeRef, MyRecord rc);
+        private native void native_print(long _nativeRef, Rc r);
 
         @NonNull
         public static native Hello create();
+
+        @NonNull
+        public static native Hello createWithRc(@NonNull Rc r);
     }
 }

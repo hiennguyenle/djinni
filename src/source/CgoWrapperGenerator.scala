@@ -272,15 +272,109 @@ class CgoWrapperGenerator(spec: Spec) extends Generator(spec) {
       w.wl
       w.wl(s"std::optional<$cpp_type_name> $className::to_cpp($cgo_type_name * cgo)").bracedSemi {
         w.wl(s"if (cgo != NULL)").braced {
-          w.wl(s"return $className::to_cpp(cgo);")
+          w.wl(s"return $className::to_cpp(*cgo);")
         }
         w.wl("return std::nullopt;")
       }
     })
   }
 
-  def generateInterface(origin: String, ident: djinni.ast.Ident, doc: djinni.ast.Doc, typeParams: Seq[djinni.ast.TypeParam], i: djinni.ast.Interface, deprecated: Option[djinni.ast.Deprecated]) {
+  def generateInterface(origin: String,
+                        ident: djinni.ast.Ident,
+                        doc: djinni.ast.Doc,
+                        typeParams: Seq[djinni.ast.TypeParam],
+                        i: djinni.ast.Interface,
+                        deprecated: Option[djinni.ast.Deprecated]) {
 
+    val refs = new CppRefs(ident, origin)
+    i.methods.foreach(m => {
+      m.params.foreach(p => refs.find(p.ty, justCollect = true))
+      m.ret.foreach(t => refs.find(t, justCollect = true))
+    })
+
+    i.consts.foreach(c => {
+      refs.find(c.ty, justCollect = true)
+    })
+
+    refs.hpp.add("#include " + marshal.cHeader(ident))
+    refs.hpp.add("#include " + q(ident.name + ".hpp"))
+
+    val fileName = marshal.cgo + ident.name
+    val self = fileName
+
+    writeCHeader(fileName, origin, "", refs.h, create = true, ".h", w => {
+      writeAsExternC(w, w => {
+        w.wl(s"struct $self;")
+        w.wl
+        for (m <- i.methods) {
+          var cFuncReturnType = marshal.cReturnType(m.ret)
+//          if(m.static) {
+//            "struct " + marshal.cReturnType(m.ret)
+//          } else {
+//            marshal.cReturnType(m.ret)
+//          }
+          if (cFuncReturnType == s"$self *") {
+            cFuncReturnType = "struct " + cFuncReturnType
+          }
+
+          val params = getDefArgs(m, self = "struct " + self + " * cgo_this")
+          w.wl(s"$cFuncReturnType ${idCpp.method(m.ident.name)}$params;")
+        }
+      })
+    })
+
+    writeCFile(fileName, origin, "", refs.hpp, create = true, w => {
+      for (m <- i.methods) {
+        w.wl
+        val cFuncReturnType = marshal.cReturnType(m.ret)
+        val params = getDefArgs(m, self = self + " * cgo_this")
+        val name = idCpp.method(m.ident.name)
+        w.wl(s"$cFuncReturnType $name$params").bracedSemi {
+          val is_create_method = m.static && (cFuncReturnType == s"$self *")
+          val skipFirst = SkipFirst()
+          if (is_create_method) {
+            val cppFunc = s"${cppMarshal.fqTypename(ident.name, i)}::$name"
+            w.w(s"auto ptr = $cppFunc(").nested {
+              for (p <- m.params) {
+                skipFirst {
+                  w.wl(",")
+                }
+                val name = idCpp.field(p.ident)
+                w.w(marshal.toCpp(p.ty, s"$name"))
+              }
+            }
+            w.wl(");")
+            w.w(s"return reinterpret_cast<$cFuncReturnType>(ptr.get());")
+          } else {
+            val cppRef = cppMarshal.fqTypename(ident.name, i)
+            w.wl(s"$cppRef * ptr = reinterpret_cast<$cppRef*>(cgo_this);")
+            if (m.ret.isDefined) {
+              w.w("return ")
+            }
+            w.w(s"ptr->$name(").nested {
+              for (p <- m.params) {
+                skipFirst {
+                  w.wl(",")
+                }
+                val name = idCpp.field(p.ident)
+                w.w(marshal.toCpp(p.ty, s"$name"))
+              }
+            }
+            w.wl(");")
+          }
+        }
+        w.wl
+      }
+    })
+  }
+
+  def getDefArgs(m: Interface.Method, self: String) = {
+    if (m.static) {
+      marshal.cArgDecl(m.params.map(p => marshal.cgoWrapperType(p.ty.resolved) + " " + idCpp.local(p.ident.name)))
+    } else {
+      marshal.cArgDecl(Seq[String](self) ++
+        m.params.map(p => marshal.cgoWrapperType(p.ty.resolved) + " " + idCpp.local(p.ident.name)))
+    }
   }
 
   def generateRecord(origin: String,

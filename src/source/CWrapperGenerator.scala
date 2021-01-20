@@ -71,9 +71,9 @@ class CWrapperGenerator(spec: Spec) extends Generator(spec) {
     listTyRef.resolved = tm
     val retType = cppMarshal.fqReturnType(Some(listTyRef))
 
-    var listElType = marshal.cParamType(getContainerElTypeRef(tm, 0, ident), true)
+    var listElType = marshal.cParamType(getContainerElTypeRef(tm, 0, ident), forHeader = true)
 
-    writeCHeader(fileName, origin, "", h, true, w => {
+    writeCHeader(fileName, origin, "", h, create = true, w => {
       writeObjectReleaseMethodSignature(name, "struct " + handlePtr, w)
       declareGlobalGettersSignatures(tm, ident, retType, classAsMethodName, w,
         "__get_elem", "size_t", listElType,
@@ -583,7 +583,7 @@ class CWrapperGenerator(spec: Spec) extends Generator(spec) {
     w.wl
     w.wl("for (int i = 0; i < size; i++) {").nested {
       w.wl("auto _el = " + marshal.convertTo(
-        raiiForElement(marshal.pyCallback(idCpp.method(className) + idCpp.method("__python_next") + p("dh.get()")), tm.args(0)),
+        raiiForElement(marshal.pyCallback(idCpp.method(className) + idCpp.method("__python_next") + p("dh.get()")), tm.args.head),
         keyTyRef,
         tempExpr = true) + ";")
       w.wl("_ret.insert(std::move(_el));")
@@ -708,13 +708,13 @@ class CWrapperGenerator(spec: Spec) extends Generator(spec) {
   }
 
   def writeMethodToCpp(m: Interface.Method, fctPrefix: String, cWrapper: String, cMethodWrapper: String, w: IndentWriter): Unit = {
-    val ret = marshal.cReturnType(m.ret, false)
+    val ret = marshal.cReturnType(m.ret)
     val args = m.params.map(p => marshal.convertTo((if (marshal.needsRAII(p.ty.resolved)) "_" else "") + p.ident.name, p.ty, tempExpr = false)) // x
     val fctCall = fctPrefix + idCpp.method(m.ident.name) + marshal.cArgVals(args)
     val returnStmt = if (m.ret.isEmpty) fctCall + ";"
     else "return " + marshal.convertFrom(fctCall, m.ret.get, tempExpr = true) + (if (marshal.needsRAII(m.ret.get)) ".release()" else "") + ";"
 
-    val params = getDefArgs(m, cWrapper + " * " + dw, false)
+    val params = getDefArgs(m, cWrapper + " * " + dw, forHeader = false)
     w.wl(ret + " " + cMethodWrapper + "_" + idCpp.method(m.ident.name) + params + " {").nested {
       // take ownership of arguments memory when arguments come from Python
       m.params.foreach(p => declareUniquePointer("_" + p.ident.name, p.ident.name, p.ty.resolved, w))
@@ -970,29 +970,29 @@ class CWrapperGenerator(spec: Spec) extends Generator(spec) {
 
     val refs = new CRefs(ident, origin)
     // first collect all references, don't write
-    i.methods.map(m => {
-      m.params.foreach(p => refs.collect(p.ty, true))
-      m.ret.foreach(t => refs.collect(t, true))
+    i.methods.foreach(m => {
+      m.params.foreach(p => refs.collect(p.ty, justCollect = true))
+      m.ret.foreach(t => refs.collect(t, justCollect = true))
     })
     i.consts.foreach(c => {
-      refs.collect(c.ty, true)
+      refs.collect(c.ty, justCollect = true)
     })
     // go through references and write
-    i.methods.map(m => {
-      m.params.foreach(p => refs.collect(p.ty, false))
-      m.ret.foreach(t => refs.collect(t, false))
+    i.methods.foreach(m => {
+      m.params.foreach(p => refs.collect(p.ty, justCollect = false))
+      m.ret.foreach(t => refs.collect(t, justCollect = false))
     })
     i.consts.foreach(c => {
-      refs.collect(c.ty, false)
+      refs.collect(c.ty, justCollect = false)
     })
 
     if (i.ext.cpp && i.ext.py) {
-      writeCFromCpp(ident, origin, cppClass, refs, i, true)
-      writeCToCpp(ident, origin, cppClass, refs, i, false)
+      writeCFromCpp(ident, origin, cppClass, refs, i, create = true)
+      writeCToCpp(ident, origin, cppClass, refs, i, create = false)
     } else if (i.ext.cpp) {
-      writeCToCpp(ident, origin, cppClass, refs, i, true)
+      writeCToCpp(ident, origin, cppClass, refs, i, create = true)
     } else if (i.ext.py) {
-      writeCFromCpp(ident, origin, cppClass, refs, i, true)
+      writeCFromCpp(ident, origin, cppClass, refs, i, create = true)
     } else {
       // Write out only the pieces of code needed to compile usage sites, without the code to implement in either
       // language.  This ensures the code can compile for unused methods which reference types not used in Python.

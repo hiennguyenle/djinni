@@ -13,3 +13,4 @@ FOUNDATION_EXPORT double DjinniExampleVersionNumber;
 FOUNDATION_EXPORT const unsigned char DjinniExampleVersionString[];
 
 #import "En.h"
+#import "Hello.h"

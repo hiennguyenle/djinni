@@ -180,6 +180,9 @@ object Main {
         .text("The namespace name to use for generated JNI C++ classes.")
       opt[String]("jni-base-lib-include-prefix").valueName("...").foreach(x => jniBaseLibIncludePrefix = x)
         .text("The JNI base library's include path, relative to the JNI C++ classes.")
+
+
+
       note("")
       opt[File]("objc-out").valueName("<out-folder>").foreach(x => objcOutFolder = Some(x))
         .text("The output folder for Objective-C files (Generator disabled if unspecified).")
@@ -200,6 +203,9 @@ object Main {
 
       opt[Boolean]("objc-closed-enums").valueName("<true/false>").foreach(x => objcClosedEnums = x)
         .text("All generated Objective-C enums will be NS_CLOSED_ENUM (default: false). ")
+
+
+
 
       note("")
       opt[File]("objcpp-out").valueName("<out-folder>").foreach(x => objcppOutFolder = Some(x))

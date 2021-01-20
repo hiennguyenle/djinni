@@ -31,6 +31,20 @@ class CgoWrapperMarshal(spec: Spec) extends Marshal(spec) { // modeled(pretty mu
 
     override def fqFieldType(tm: djinni.meta.MExpr): String = throw new NotImplementedError()
 
+    def cReturnType(ret: Option[TypeRef], forHeader: Boolean = false): String = {
+        if (ret.isEmpty) return "void"
+        toCwrapperType(ret.get.resolved, forHeader)
+    }
+
+    def cArgDecl(args: Seq[String]) = {
+        if (args.isEmpty) {
+            // CWrapper headers need to be parsed as C.  `()` in C means "unspecified args" and triggers
+            // -Wstrict-prototypes.  `(void)` means no args in C.  In C++ the two forms are equivalent.
+            "(void)"
+        } else {
+            args.mkString("(", ", ", ")")
+        }
+    }
     def toCwrapperType(tm: MExpr, forHeader: Boolean): String = {
         def base(m: Meta): String = {
             val structPrefix = if (forHeader) "struct " else ""
@@ -54,7 +68,8 @@ class CgoWrapperMarshal(spec: Spec) extends Marshal(spec) { // modeled(pretty mu
                 case d: MDef =>
                     d.defType match {
                         case DEnum | DRecord => cgo + d.name
-                        case DInterface => structPrefix + djinniWrapper + idCpp.ty(d.name) + " *"
+                        case DInterface => cgo + d.name + " *"
+
                     }
                 case p: MParam => idCpp.typeParam(p.name)
                 case e: MExtern => throw new NotImplementedError()

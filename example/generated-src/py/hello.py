@@ -3,29 +3,27 @@
 
 from djinni.support import MultiSet # default imported in all files
 from djinni.exception import CPyException # default imported in all files
-from djinni.pycffi_marshal import CPyEnum, CPyRecord
+from djinni.pycffi_marshal import CPyRecord
 
 from abc import ABCMeta, abstractmethod
 from future.utils import with_metaclass
-from my_enum import MyEnum
-from my_record import MyRecord
-from my_record_helper import MyRecordHelper
+from rc import Rc
+from rc_helper import RcHelper
 from PyCFFIlib_cffi import ffi, lib
 
 from djinni import exception # this forces run of __init__.py which gives cpp option to call back into py to create exception
 
 class Hello(with_metaclass(ABCMeta)):
     @abstractmethod
-    def say_hi(self):
-        raise NotImplementedError
-
-    @abstractmethod
-    def print(self, rc):
+    def print(self, r):
         raise NotImplementedError
 
     @staticmethod
     def create():
         return HelloCppProxy.create()
+    @staticmethod
+    def create_with_rc(r):
+        return HelloCppProxy.create_with_rc(r)
 
 class HelloCppProxy(Hello):
     def __init__(self, proxy):
@@ -44,19 +42,17 @@ class HelloCppProxy(Hello):
         assert _ret is not None
         return _ret
 
-    def say_hi(self):
-        _ret_c = lib.cw__hello_say_hi(self._cpp_impl)
+    @staticmethod
+    def create_with_rc(r):
+        _ret_c = lib.cw__hello_create_with_rc(CPyRecord.fromPy(Rc.c_data_set, r))
         CPyException.toPyCheckAndRaise(_ret_c)
-        _ret = CPyEnum.toPy(MyEnum, _ret_c)
-        assert _ret.value != -1
-        return _ret
-
-    def print(self, rc):
-        _ret_c = lib.cw__hello_print(self._cpp_impl, CPyRecord.fromPy(MyRecord.c_data_set, rc))
-        CPyException.toPyCheckAndRaise(_ret_c)
-        _ret = CPyRecord.toPy(MyRecord.c_data_set, _ret_c)
+        _ret = HelloHelper.toPy(_ret_c)
         assert _ret is not None
         return _ret
+
+    def print(self, r):
+        lib.cw__hello_print(self._cpp_impl, CPyRecord.fromPy(Rc.c_data_set, r))
+        CPyException.toPyCheckAndRaise(ffi.NULL)
 
 class HelloHelper:
     c_data_set = MultiSet()

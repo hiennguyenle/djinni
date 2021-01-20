@@ -23,3 +23,9 @@ rc = record {
     e1: en;
     e2: optional<en>;
 }
+
+hello = interface +c {
+    static create(): hello;
+    static create_with_rc(r: rc): hello;
+    print(r: rc);
+}
