@@ -112,9 +112,15 @@ package object generatorTools {
         if (!spec.skipGeneration) {
           createFolder("C", spec.cWrapperOutFolder.get)
         }
+         new CWrapperGenerator(spec).generate(idl)
+      }
+
+      if (spec.cgoWrapperOutFolder.isDefined) {
+        DEBUG(spec.cgoWrapperOutFolder.get.toString)
+        if (!spec.skipGeneration) {
+          createFolder("Cgo wrapper", spec.cgoWrapperOutFolder.get)
+        }
         new CgoWrapperGenerator(spec).generate(idl)
-        // new CWrapperGenerator(spec).generate(idl)
-        // CgoWrapperGenerator
       }
 
       if (spec.pycffiOutFolder.isDefined) {
@@ -221,7 +227,8 @@ package object generatorTools {
                    pyImportPrefix: String,
                    swiftIdentStyle: SwiftIdentStyle,
                    swiftOutFolder: Option[File],
-                   swiftGeneratedHeader: Option[String])
+                   swiftGeneratedHeader: Option[String],
+                   cgoWrapperOutFolder: Option[File])
 
   case class CppIdentStyle(ty: IdentConverter, enumType: IdentConverter, typeParam: IdentConverter,
                            method: IdentConverter, field: IdentConverter, local: IdentConverter,
@@ -231,7 +238,7 @@ package object generatorTools {
                             method: IdentConverter, field: IdentConverter, local: IdentConverter,
                             enum: IdentConverter, const: IdentConverter)
 
-  implicit val javaAccessModifierReads: scopt.Read[JavaAccessModifier.Value] = scopt.Read.reads(JavaAccessModifier withName _)
+  implicit val javaAccessModifierReads: scopt.Read[JavaAccessModifier.Value] = scopt.Read.reads(JavaAccessModifier withName)
 
   case class ObjcIdentStyle(ty: IdentConverter, typeParam: IdentConverter,
                             method: IdentConverter, field: IdentConverter, local: IdentConverter,

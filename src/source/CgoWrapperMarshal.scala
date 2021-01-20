@@ -162,7 +162,7 @@ class CgoWrapperMarshal(spec: Spec) extends Marshal(spec) { // modeled(pretty mu
                     val cppHelperClass = s"$djinniWrapper" + idCpp.typeParam(cgoWrapperType(tm))
                     s"$cppHelperClass::from_cpp($expr)"
                 case meta.MDate => throw new NotImplementedError()
-                case meta.MBinary => throw new NotImplementedError()
+                case meta.MBinary => s"DjinniBinary::from_cpp($expr)"
                 case meta.MOptional =>
                     val baseField = tm.args.head
                     val cgoReturnType = cgoWrapperType(baseField)
@@ -196,7 +196,7 @@ class CgoWrapperMarshal(spec: Spec) extends Marshal(spec) { // modeled(pretty mu
                     val cppHelperClass = s"$djinniWrapper" + idCpp.typeParam(cgoWrapperType(tm))
                     s"$cppHelperClass::to_cpp($expr)"
                 case meta.MDate => throw new NotImplementedError()
-                case meta.MBinary => throw new NotImplementedError()
+                case meta.MBinary => s"DjinniBinary::to_cpp($expr)"
                 case meta.MOptional =>
                     val baseField = tm.args.head.base
                     baseField match {

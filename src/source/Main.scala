@@ -100,6 +100,7 @@ object Main {
     var swiftIdentStyle = IdentStyle.swiftDefault
     var swiftOutFolder: Option[File] = None
     var swiftGeneratedHeader: Option[String] = None
+    var cgoWrapperOutFolder: Option[File] = None
 
     val argParser: OptionParser[Unit] = new scopt.OptionParser[Unit]("djinni") {
       def identStyle(optionName: String, update: IdentConverter => Unit): OptionDef[String, Unit] = {
@@ -203,8 +204,9 @@ object Main {
 
       opt[Boolean]("objc-closed-enums").valueName("<true/false>").foreach(x => objcClosedEnums = x)
         .text("All generated Objective-C enums will be NS_CLOSED_ENUM (default: false). ")
-
-
+      note("")
+      opt[File]("cgo-wrapper-out").valueName("<out-folder>").foreach(x => cgoWrapperOutFolder = Some(x))
+        .text("The output folder for Cgo wrapper files (Generator disabled if unspecified).")
 
 
       note("")
@@ -499,7 +501,8 @@ object Main {
       pyImportPrefix,
       swiftIdentStyle,
       swiftOutFolder,
-      swiftGeneratedHeader
+      swiftGeneratedHeader,
+      cgoWrapperOutFolder
     )
 
     try {
