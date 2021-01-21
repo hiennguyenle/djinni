@@ -308,11 +308,7 @@ class CgoWrapperGenerator(spec: Spec) extends Generator(spec) {
         w.wl
         for (m <- i.methods) {
           var cFuncReturnType = marshal.cReturnType(m.ret)
-//          if(m.static) {
-//            "struct " + marshal.cReturnType(m.ret)
-//          } else {
-//            marshal.cReturnType(m.ret)
-//          }
+
           if (cFuncReturnType == s"$self *") {
             cFuncReturnType = "struct " + cFuncReturnType
           }
@@ -331,36 +327,21 @@ class CgoWrapperGenerator(spec: Spec) extends Generator(spec) {
         val name = idCpp.method(m.ident.name)
         w.wl(s"$cFuncReturnType $name$params").bracedSemi {
           val is_create_method = m.static && (cFuncReturnType == s"$self *")
-          val skipFirst = SkipFirst()
           if (is_create_method) {
             val cppFunc = s"${cppMarshal.fqTypename(ident.name, i)}::$name"
-            w.w(s"auto ptr = $cppFunc(").nested {
-              for (p <- m.params) {
-                skipFirst {
-                  w.wl(",")
-                }
-                val name = idCpp.field(p.ident)
-                w.w(marshal.toCpp(p.ty, s"$name"))
-              }
-            }
-            w.wl(");")
-            w.w(s"return reinterpret_cast<$cFuncReturnType>(ptr.get());")
+            val params = m.params.map(p => marshal.toCpp(p.ty, idCpp.field(p.ident)))
+            w.wl(s"auto ptr = $cppFunc${params.mkString("(", ", ", ")")};")
+            w.wl(s"return reinterpret_cast<$cFuncReturnType>(ptr.get());")
           } else {
             val cppRef = cppMarshal.fqTypename(ident.name, i)
             w.wl(s"$cppRef * ptr = reinterpret_cast<$cppRef*>(cgo_this);")
+            val params = m.params.map(p => marshal.toCpp(p.ty, idCpp.field(p.ident)))
+            val ret = s"ptr->$name${params.mkString("(", ", ", ")")}"
             if (m.ret.isDefined) {
-              w.w("return ")
+              w.wl(s"return ${marshal.fromCpp(m.ret.get, ret)};")
+            } else {
+              w.wl(s"$ret;")
             }
-            w.w(s"ptr->$name(").nested {
-              for (p <- m.params) {
-                skipFirst {
-                  w.wl(",")
-                }
-                val name = idCpp.field(p.ident)
-                w.w(marshal.toCpp(p.ty, s"$name"))
-              }
-            }
-            w.wl(");")
           }
         }
         w.wl
@@ -368,7 +349,7 @@ class CgoWrapperGenerator(spec: Spec) extends Generator(spec) {
     })
   }
 
-  def getDefArgs(m: Interface.Method, self: String) = {
+  def getDefArgs(m: Interface.Method, self: String): String = {
     if (m.static) {
       marshal.cArgDecl(m.params.map(p => marshal.cgoWrapperType(p.ty.resolved) + " " + idCpp.local(p.ident.name)))
     } else {

@@ -113,7 +113,7 @@ class CgoWrapperMarshal(spec: Spec) extends Marshal(spec) { // modeled(pretty mu
         case MBinary => List(ImportRef("<vector>"), ImportRef("<stdint.h>"))
         case MOptional => List(ImportRef(spec.cppOptionalHeader))
         case d: MDef => d.defType match {
-            case DInterface => List(ImportRef(q(cgo + d.name + ".hpp")))
+            case DInterface => List()
             case DRecord =>
                 List(ImportRef(q(cgo + d.name + ".hpp")), ImportRef(q(d.name + ".hpp")))
             case DEnum => List(ImportRef(q(d.name + ".hpp")), ImportRef(q(cgo + d.name + ".hpp")))
