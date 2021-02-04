@@ -125,6 +125,7 @@ class CgoWrapperMarshal(spec: Spec) extends Marshal(spec) { // modeled(pretty mu
     def cgoWrapperType(tm: MExpr): String = {
         def find(m: Meta): String = m match {
             case p: MPrimitive => p.cName
+            case MString => cgo + "string"
             case d: MDef =>
                 d.defType match {
                     case DRecord | DEnum => cgo + d.name
@@ -216,6 +217,43 @@ class CgoWrapperMarshal(spec: Spec) extends Marshal(spec) { // modeled(pretty mu
                 case meta.DRecord =>
                     val cppHelperClass = s"$djinniWrapper" + idCpp.typeParam(cgo + d.name)
                     s"$cppHelperClass::to_cpp($expr)"
+            }
+            case e: MExtern => throw new NotImplementedError()
+        }
+        base(tm.base)
+    }
+
+    def free_memory(tm: MExpr, expr: String): Option[String] = {
+        def base(m: Meta, pointer: Boolean = false): Option[String] = m match {
+            case opaque: MOpaque => opaque match {
+                case meta.MString => Option(s"free_cgo_string(&($expr))")
+                case meta.MList =>
+                    val list_name = s"${cgoWrapperType(tm)}"
+                    Option(s"${list_name}__delete(&($expr))")
+                case meta.MDate => throw new NotImplementedError()
+                case meta.MBinary => Option(s"free_cgo_binary(&($expr))")
+                case meta.MOptional =>
+                    val baseField = tm.args.head.base
+                    baseField match {
+                        case p: MPrimitive => Option(s"delete $expr")
+                        case _ => base(baseField, pointer = true)
+                    }
+                case p: MPrimitive => null
+                case meta.MSet => throw new NotImplementedError()
+                case meta.MMap => throw new NotImplementedError()
+                case meta.MJson => throw new NotImplementedError()
+            }
+            case MParam(name) => throw new NotImplementedError()
+            case d: MDef => d.defType match {
+                case meta.DRecord =>
+                    val cppHelperClass = s"$djinniWrapper" + idCpp.typeParam(cgo + d.name)
+                    val ptr = if (pointer) {
+                        s"$expr"
+                    } else {
+                        s"&($expr)"
+                    }
+                    Option(s"${cgo + d.name}__delete($ptr)")
+                case _ => null
             }
             case e: MExtern => throw new NotImplementedError()
         }
