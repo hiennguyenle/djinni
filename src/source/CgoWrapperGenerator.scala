@@ -76,44 +76,67 @@ class CgoWrapperGenerator(spec: Spec) extends Generator(spec) {
     })
   }
 
-  def generateList(tm: MExpr, name: String, ident: Ident, origin: String, h: mutable.TreeSet[String], hpp: mutable.TreeSet[String]): Unit = {
-    val structName = s"${marshal.cgoWrapperType(tm)}"
+  def generateList(tm: MExpr, name: String, ident: Ident, origin: String): Unit = {
+    val struct_name = s"${marshal.cgoWrapperType(tm)}"
     val cgo_type_name = marshal.cgoWrapperType(tm.args.head)
     val cpp_type_name = cppMarshal.fqTypename(tm)
 
-    val init_func = s"${structName}__init"
+    // Collect h header files
+    val h: mutable.TreeSet[String] = mutable.TreeSet[String]()
+    for (r <- marshal.hReferences(tm.args.head.base, ident)) r match {
+      case ImportRef(arg) =>
+        h.add("#include " + arg)
+      case _ =>
+    }
 
+    // Collect hpp header files
+    val hpp: mutable.TreeSet[String] = mutable.TreeSet[String]()
+    for (r <- marshal.hppReferences(tm.args.head.base, ident)) r match {
+      case ImportRef(arg) =>
+        hpp.add("#include " + arg)
+      case _ =>
+    }
+
+    for (r <- marshal.hppReferences(tm.base, ident)) r match {
+      case ImportRef(arg) =>
+        hpp.add("#include " + arg)
+      case _ =>
+    }
+
+    hpp.add(s"#include " + q(struct_name + ".h"))
+    val init_func = s"${struct_name}__init"
     val className = "Djinni" + idCpp.ty(name)
 
     // Write extern C API
-    writeCHeader(structName, origin, "", h, create = true, ".h", w => {
+    writeCHeader(struct_name, origin, "", h, create = true, ".h", w => {
       writeAsExternC(w, w => {
         w.wl(s"#define $init_func {0, NULL}")
         w.wl
-        w.w(s"typedef struct ${structName}_").bracedEnd(s" $structName;") {
+        w.w(s"typedef struct ${struct_name}_").bracedEnd(s" $struct_name;") {
           w.wl(s"size_t length;")
           w.wl(s"$cgo_type_name * data;")
         }
         w.wl
-        w.wl(s"void ${structName}__delete($structName *);")
+        w.wl(s"void ${struct_name}__delete($struct_name *);")
       })
     })
 
     // Write Hpp
-    writeCHeader(structName, origin, "", h ++ hpp, create = true, ".hpp", w => {
+    writeCHeader(struct_name, origin, "", h ++ hpp, create = true, ".hpp", w => {
       w.wl
       w.wl(s"struct $className").bracedSemi {
-        w.wl(s"static $structName from_cpp(const $cpp_type_name & data);")
-        w.wl(s"static $cpp_type_name to_cpp(const $structName & data);")
+        w.wl(s"static $struct_name from_cpp(const $cpp_type_name & data);")
+        w.wl(s"static $cpp_type_name to_cpp(const $struct_name & data);")
       }
     })
 
     // Write Cpp
-
-    writeCFile(structName, origin, "", hpp, create = true, w => {
+    val cpp: mutable.TreeSet[String] = mutable.TreeSet[String]()
+    cpp.add(s"#include " + q(struct_name + ".hpp"))
+    writeCFile(struct_name, origin, "", cpp, create = true, w => {
       w.wl
 
-      w.wl(s"void ${structName}__delete($structName *ptr)").bracedSemi {
+      w.wl(s"void ${struct_name}__delete($struct_name *ptr)").bracedSemi {
         w.wl(s"if (ptr == nullptr)").braced {
           w.wl("return;")
         }
@@ -124,8 +147,8 @@ class CgoWrapperGenerator(spec: Spec) extends Generator(spec) {
         w.wl(s"ptr->data = NULL;")
       }
       w.wl
-      w.wl(s"$structName $className::from_cpp(const $cpp_type_name & data)").bracedSemi {
-        w.wl(s"$structName cgo = $init_func;")
+      w.wl(s"$struct_name $className::from_cpp(const $cpp_type_name & data)").bracedSemi {
+        w.wl(s"$struct_name cgo = $init_func;")
         w.wl(s"if (data.empty())").braced {
           w.wl("return cgo;")
         }
@@ -158,7 +181,7 @@ class CgoWrapperGenerator(spec: Spec) extends Generator(spec) {
         w.wl("return cgo;")
       }
       w.wl
-      w.wl(s"$cpp_type_name $className::to_cpp(const $structName & cgo)").bracedSemi {
+      w.wl(s"$cpp_type_name $className::to_cpp(const $struct_name & cgo)").bracedSemi {
         tm.args.head.base match {
           case _: MPrimitive => w.wl(s"return $cpp_type_name(cgo.data, cgo.data + cgo.length);")
           case MString =>
@@ -219,7 +242,7 @@ class CgoWrapperGenerator(spec: Spec) extends Generator(spec) {
         if (!Generator.writtenFiles.contains((fileName + ".h").toLowerCase())) {
           Generator.writtenFiles.put((fileName + ".h").toLowerCase(), fileName)
           tm.base match {
-            case MList => generateList(tm, name, ident, origin, h, hpp)
+            case MList => generateList(tm, name, ident, origin)
             case MMap => generateMap(tm, name, ident, origin, h, hpp)
             case MSet => generateSet(tm, name, ident, origin, h, hpp)
             case _ =>
@@ -444,7 +467,6 @@ class CgoWrapperGenerator(spec: Spec) extends Generator(spec) {
     refs.hpp.add("#include " + marshal.cHeader(ident))
     refs.hpp.add("#include <optional>")
     refs.cpp.add("#include " + marshal.cppHeader(ident))
-
 
     writeCHeader(structName, origin, "", refs.h, create = true, ".h", w => {
       writeAsExternC(w, w => {

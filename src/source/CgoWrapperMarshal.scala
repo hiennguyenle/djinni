@@ -109,6 +109,7 @@ class CgoWrapperMarshal(spec: Spec) extends Marshal(spec) { // modeled(pretty mu
             case _ => List()
         }
         case MDate => List(ImportRef("<chrono>"))
+        case MList => List(ImportRef("<vector>"))
         case MString => List(ImportRef("<string>"))
         case MBinary => List(ImportRef("<vector>"), ImportRef("<stdint.h>"))
         case MOptional => List(ImportRef(spec.cppOptionalHeader))
