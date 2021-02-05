@@ -126,6 +126,7 @@ class CgoWrapperMarshal(spec: Spec) extends Marshal(spec) { // modeled(pretty mu
         def find(m: Meta): String = m match {
             case p: MPrimitive => p.cName
             case MString => cgo + "string"
+            case MBinary => cgo + "binary"
             case d: MDef =>
                 d.defType match {
                     case DRecord | DEnum => cgo + d.name

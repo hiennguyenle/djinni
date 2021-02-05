@@ -77,40 +77,43 @@ class CgoWrapperGenerator(spec: Spec) extends Generator(spec) {
   }
 
   def generateList(tm: MExpr, name: String, ident: Ident, origin: String, h: mutable.TreeSet[String], hpp: mutable.TreeSet[String]): Unit = {
-    val fileName = s"${marshal.cgoWrapperType(tm)}"
+    val structName = s"${marshal.cgoWrapperType(tm)}"
     val cgo_type_name = marshal.cgoWrapperType(tm.args.head)
     val cpp_type_name = cppMarshal.fqTypename(tm)
+
+    val init_func = s"${structName}__init"
 
     val className = "Djinni" + idCpp.ty(name)
 
     // Write extern C API
-    writeCHeader(fileName, origin, "", h, create = true, ".h", w => {
+    writeCHeader(structName, origin, "", h, create = true, ".h", w => {
       writeAsExternC(w, w => {
-        w.w(s"typedef struct").braced {
+        w.wl(s"#define $init_func {0, NULL}")
+        w.wl
+        w.w(s"typedef struct ${structName}_").bracedEnd(s" $structName;") {
           w.wl(s"size_t length;")
           w.wl(s"$cgo_type_name * data;")
         }
-        w.wl(s"$fileName;")
         w.wl
-        w.wl(s"void ${fileName}__delete($fileName *);")
+        w.wl(s"void ${structName}__delete($structName *);")
       })
     })
 
     // Write Hpp
-    writeCHeader(fileName, origin, "", h ++ hpp, create = true, ".hpp", w => {
+    writeCHeader(structName, origin, "", h ++ hpp, create = true, ".hpp", w => {
       w.wl
       w.wl(s"struct $className").bracedSemi {
-        w.wl(s"static $fileName from_cpp(const $cpp_type_name & data);")
-        w.wl(s"static $cpp_type_name to_cpp(const $fileName & data);")
+        w.wl(s"static $structName from_cpp(const $cpp_type_name & data);")
+        w.wl(s"static $cpp_type_name to_cpp(const $structName & data);")
       }
     })
 
     // Write Cpp
 
-    writeCFile(fileName, origin, "", hpp, create = true, w => {
+    writeCFile(structName, origin, "", hpp, create = true, w => {
       w.wl
 
-      w.wl(s"void ${fileName}__delete($fileName *ptr)").bracedSemi {
+      w.wl(s"void ${structName}__delete($structName *ptr)").bracedSemi {
         w.wl(s"if (ptr == nullptr)").braced {
           w.wl("return;")
         }
@@ -118,13 +121,15 @@ class CgoWrapperGenerator(spec: Spec) extends Generator(spec) {
           w.wl("return;")
         }
         w.wl(s"delete ptr->data;")
-        w.wl(s"delete ptr;")
+        w.wl(s"ptr->data = NULL;")
       }
-
       w.wl
-
-      w.wl(s"$fileName $className::from_cpp(const $cpp_type_name & data)").bracedSemi {
-        w.wl(s"$fileName cgo;")
+      w.wl(s"$structName $className::from_cpp(const $cpp_type_name & data)").bracedSemi {
+        w.wl(s"$structName cgo = $init_func;")
+        w.wl(s"if (data.empty())").braced {
+          w.wl("return cgo;")
+        }
+        w.wl
         w.wl(s"cgo.length = data.size();")
         tm.args.head.base match {
           case p: MPrimitive =>
@@ -150,11 +155,10 @@ class CgoWrapperGenerator(spec: Spec) extends Generator(spec) {
           }
           case _ => throw new NotImplementedError()
         }
-
         w.wl("return cgo;")
       }
       w.wl
-      w.wl(s"$cpp_type_name $className::to_cpp(const $fileName & cgo)").bracedSemi {
+      w.wl(s"$cpp_type_name $className::to_cpp(const $structName & cgo)").bracedSemi {
         tm.args.head.base match {
           case _: MPrimitive => w.wl(s"return $cpp_type_name(cgo.data, cgo.data + cgo.length);")
           case MString =>
@@ -348,6 +352,7 @@ class CgoWrapperGenerator(spec: Spec) extends Generator(spec) {
 
           val params = getDefArgs(m, self = "struct " + self + " * cgo_this")
           w.wl(s"$cFuncReturnType $prefix${idCpp.method(m.ident.name)}$params;")
+          w.wl
         }
 
         w.wl(s"void ${prefix}delete(struct $self * ptr);")
@@ -368,13 +373,25 @@ class CgoWrapperGenerator(spec: Spec) extends Generator(spec) {
         val params = getDefArgs(m, self = self + " * cgo_this")
         val name = idCpp.method(m.ident.name)
         w.wl(s"$cFuncReturnType $prefix$name$params").bracedSemi {
-          val is_create_method = m.static && (cFuncReturnType == s"$self *")
-          if (is_create_method) {
-            val cppFunc = s"${cppMarshal.fqTypename(ident.name, i)}::$name"
-            val params = m.params.map(p => marshal.toCpp(p.ty, idCpp.field(p.ident)))
-            w.wl(s"_ptr_holder = $cppFunc${params.mkString("(", ", ", ")")};")
-            w.wl(s"return reinterpret_cast<$cFuncReturnType>(_ptr_holder.get());")
-          } else {
+          if (m.static) {
+            if (cFuncReturnType == s"$self *") {
+              val cppFunc = s"${cppMarshal.fqTypename(ident.name, i)}::$name"
+              val params = m.params.map(p => marshal.toCpp(p.ty, idCpp.field(p.ident)))
+              w.wl(s"_ptr_holder = $cppFunc${params.mkString("(", ", ", ")")};")
+              w.wl(s"return reinterpret_cast<$cFuncReturnType>(_ptr_holder.get());")
+            } else {
+              val cppRef = cppMarshal.fqTypename(ident.name, i)
+              val params = m.params.map(p => marshal.toCpp(p.ty, idCpp.field(p.ident)))
+              val cppFunc = s"${cppMarshal.fqTypename(ident.name, i)}::$name"
+              val ret = s"$cppFunc${params.mkString("(", ", ", ")")}"
+              if (m.ret.isDefined) {
+                w.wl(s"return ${marshal.fromCpp(m.ret.get, ret)};")
+              } else {
+                w.wl(s"$ret;")
+              }
+            }
+          }
+          else {
             val cppRef = cppMarshal.fqTypename(ident.name, i)
             w.wl(s"$cppRef * ptr = reinterpret_cast<$cppRef*>(cgo_this);")
             val params = m.params.map(p => marshal.toCpp(p.ty, idCpp.field(p.ident)))
@@ -410,7 +427,7 @@ class CgoWrapperGenerator(spec: Spec) extends Generator(spec) {
 
     val refs = new CppRefs(ident, origin)
 
-    val fileName = marshal.cgo + ident.name
+    val structName = marshal.cgo + ident.name
     val superRecord = getSuperRecord(idl, r)
     val superFields: Seq[Field] = superRecord match {
       case None => Seq.empty
@@ -429,27 +446,26 @@ class CgoWrapperGenerator(spec: Spec) extends Generator(spec) {
     refs.cpp.add("#include " + marshal.cppHeader(ident))
 
 
-    writeCHeader(fileName, origin, "", refs.h, create = true, ".h", w => {
+    writeCHeader(structName, origin, "", refs.h, create = true, ".h", w => {
       writeAsExternC(w, w => {
-        w.w(s"typedef struct").braced {
+        w.w(s"typedef struct ${structName}_").bracedEnd(s" ${structName};") {
           for (f <- fields) {
             writeDoc(w, f.doc)
             w.wl(marshal.toCwrapperType(f.ty.resolved, forHeader = false) + " " + idCpp.field(f.ident) + ";")
           }
         }
-        w.wl(s"$fileName;")
 
         w.wl
-        w.wl(s"void ${fileName}__delete($fileName *);")
-        w.wl(s"#define ${fileName}__init {}")
+        w.wl(s"void ${structName}__delete($structName *);")
+        w.wl(s"#define ${structName}__init {}")
       })
     })
 
-    val className = "Djinni" + idCpp.ty(fileName)
+    val className = "Djinni" + idCpp.ty(structName)
     val cpp_type_name = cppMarshal.fqTypename(ident, r)
     val cgo_type_name = marshal.cgo + ident.name
 
-    writeCHeader(fileName, origin, "", refs.hpp, create = true, ".hpp", w => {
+    writeCHeader(structName, origin, "", refs.hpp, create = true, ".hpp", w => {
       w.wl(s"struct $className").bracedSemi {
         w.wl(s"static $cgo_type_name from_cpp(const $cpp_type_name & cpp);")
         w.wl(s"static $cpp_type_name to_cpp(const $cgo_type_name & cgo);")
@@ -460,9 +476,9 @@ class CgoWrapperGenerator(spec: Spec) extends Generator(spec) {
     })
 
     // Write Cpp
-    writeCFile(fileName, origin, "", refs.cpp, create = true, w => {
+    writeCFile(structName, origin, "", refs.cpp, create = true, w => {
       w.wl
-      w.wl(s"void ${fileName}__delete($fileName * ptr)").bracedSemi {
+      w.wl(s"void ${structName}__delete($structName * ptr)").bracedSemi {
         for (f <- fields) {
           val field_name = s"ptr->${idCpp.field(f.ident)}"
           val free_memory = marshal.free_memory(f.ty.resolved, field_name)
@@ -473,7 +489,7 @@ class CgoWrapperGenerator(spec: Spec) extends Generator(spec) {
       }
 
       w.wl
-      w.wl(s"$fileName $className::from_cpp(const $cpp_type_name & cpp)").bracedSemi {
+      w.wl(s"$structName $className::from_cpp(const $cpp_type_name & cpp)").bracedSemi {
         val skipFirst = SkipFirst()
         w.wl("return ").bracedSemi {
           for (i <- fields.indices) {
@@ -487,7 +503,7 @@ class CgoWrapperGenerator(spec: Spec) extends Generator(spec) {
         }
       }
       w.wl
-      w.wl(s"$cpp_type_name $className::to_cpp(const $fileName & cgo)").bracedSemi {
+      w.wl(s"$cpp_type_name $className::to_cpp(const $structName & cgo)").bracedSemi {
         val skipFirst = SkipFirst()
         w.wl("return ").bracedSemi {
           for (i <- fields.indices) {
