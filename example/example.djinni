@@ -1,8 +1,5 @@
 kkk = interface +c {
+    static initialize(): kkk;
+
     static print(r: u8): u8;
-}
-
-
-hien = record {
-    val: i8;
 }

@@ -400,7 +400,7 @@ class CgoWrapperGenerator(spec: Spec) extends Generator(spec) {
         val name = idCpp.method(m.ident.name)
         w.wl(s"$cFuncReturnType $prefix$name$params").bracedSemi {
           if (m.static) {
-            if (has_init_func.isDefined) {
+            if (cFuncReturnType == s"$self *") {
               val cppFunc = s"${cppMarshal.fqTypename(ident.name, i)}::$name"
               val params = m.params.map(p => marshal.toCpp(p.ty, idCpp.field(p.ident)))
               w.wl(s"_ptr_holder = $cppFunc${params.mkString("(", ", ", ")")};")
@@ -430,13 +430,6 @@ class CgoWrapperGenerator(spec: Spec) extends Generator(spec) {
         }
         w.wl
       }
-
-//      if (has_init_func) {
-//        w.wl
-//        w.wl(s"void ${prefix}delete(struct $self * ptr)").bracedSemi {
-//          w.wl("_ptr_holder.reset();")
-//        }
-//      }
     })
   }
 
