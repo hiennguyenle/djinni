@@ -212,6 +212,9 @@ class CppGenerator(spec: Spec) extends Generator(spec) {
     refs.hpp.add("#include <utility>") // Add for std::move
     refs.hpp.add("#include <string>") // Add for std::string
 
+    refs.hpp.add("#include " + q("json.hpp"))
+    refs.hpp.add("#include " + q("json+extension.hpp"))
+
     val self = marshal.typename(ident, r)
     val (cppName, cppFinal) = if (r.ext.cpp) (ident.name + "_base", "") else (ident.name, "")
 
@@ -311,10 +314,11 @@ class CppGenerator(spec: Spec) extends Generator(spec) {
           w.wl(s"$actualSelf& operator=(const $actualSelf&) = default;")
           w.wl(s"$actualSelf& operator=($actualSelf&&) = default;")
         }
-//        superRecord match {
-//          case None => w.wl("virtual std::string description() const;")
-//          case Some(value) => w.wl("std::string description() const override;")
-//        }
+
+        superRecord match {
+          case None => w.wl("virtual nlohmann::json to_json() const;")
+          case Some(_) => w.wl("nlohmann::json to_json() const override;")
+        }
       }
     }
 
@@ -361,7 +365,7 @@ class CppGenerator(spec: Spec) extends Generator(spec) {
       }
     }
 
-    writeHppFile(cppName, origin, refs.hpp, refs.hppFwds, writeCppPrototype)
+    writeHppFile(cppName, origin, refs.hpp, refs.hppFwds, writeCppPrototype, writeJsonExtension)
 
     // if (r.consts.nonEmpty || r.derivingTypes.contains(DerivingType.Eq) || r.derivingTypes.contains(DerivingType.Ord)) {
     writeCppFile(cppName, origin, refs.cpp, w => {
@@ -416,16 +420,10 @@ class CppGenerator(spec: Spec) extends Generator(spec) {
         }
       }
 
-//      w.w(s"std::string $actualSelf::description() const").braced {
-//        w.wl("return ((nlohmann::json)(*this)).dump(2);")
-//      }
+      w.w(s"nlohmann::json $actualSelf::to_json() const").braced {
+        w.wl("return ((nlohmann::json)(*this));")
+      }
     })
-
-    refs.hpp.add("#include " + q(spec.cppExtendedRecordIncludePrefix + spec.cppFileIdentStyle(ident + "." + spec.cppHeaderExt)))
-    refs.hpp.add("#include " + q("json.hpp"))
-    refs.hpp.add("#include " + q("json+extension.hpp"))
-
-    writeHppFile(s"$cppName+json", origin, refs.hpp, refs.hppFwds, _ => {}, writeJsonExtension)
   }
 
   override def generateInterface(origin: String, ident: Ident, doc: Doc, typeParams: Seq[TypeParam], i: Interface, deprecated: scala.Option[Deprecated]) {

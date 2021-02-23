@@ -12,4 +12,3 @@ FOUNDATION_EXPORT double DjinniExampleVersionNumber;
 //! Project version string for DjinniExample.
 FOUNDATION_EXPORT const unsigned char DjinniExampleVersionString[];
 
-#import "Kkk.h"
