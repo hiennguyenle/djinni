@@ -9,28 +9,17 @@
 /* Begin PBXBuildFile section */
 		03917DEBB25F8234528CBAFA /* Pods_DjinniExample.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 81870153E1D737A1E6A8E35B /* Pods_DjinniExample.framework */; };
 		1984E6D195102A57FF9C35C6 /* Pods_djinni_ios_example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 36D4770B944237FFD6AE4609 /* Pods_djinni_ios_example.framework */; };
-		2C2BF98A2507360B002882AC /* my_enum.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 2C2BF9222507360B002882AC /* my_enum.hpp */; };
 		2C2BF98B2507360B002882AC /* rc.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 2C2BF9232507360B002882AC /* rc.hpp */; };
 		2C2BF98C2507360B002882AC /* hello.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 2C2BF9242507360B002882AC /* hello.hpp */; };
-		2C2BF98D2507360B002882AC /* my_record.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 2C2BF9252507360B002882AC /* my_record.hpp */; };
-		2C2BF98E2507360B002882AC /* MyEnum.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C2BF9272507360B002882AC /* MyEnum.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		2C2BF9902507360B002882AC /* MyRecord+Internal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C2BF9292507360B002882AC /* MyRecord+Internal.swift */; };
 		2C2BF9922507360B002882AC /* DjinniExample.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C2BF92B2507360B002882AC /* DjinniExample.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		2C2BF9932507360B002882AC /* Hello.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C2BF92C2507360B002882AC /* Hello.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		2C2BF9942507360B002882AC /* Rc+Internal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C2BF92D2507360B002882AC /* Rc+Internal.swift */; };
 		2C2BF9952507360B002882AC /* Rc.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C2BF92E2507360B002882AC /* Rc.swift */; };
-		2C2BF9962507360B002882AC /* MyRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C2BF92F2507360B002882AC /* MyRecord.swift */; };
 		2C2BF9C22507360B002882AC /* Rc+Private.mm in Sources */ = {isa = PBXBuildFile; fileRef = 2C2BF95E2507360B002882AC /* Rc+Private.mm */; };
 		2C2BF9C32507360B002882AC /* Hello+Private.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C2BF95F2507360B002882AC /* Hello+Private.h */; };
-		2C2BF9C42507360B002882AC /* MyEnum+Private.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C2BF9602507360B002882AC /* MyEnum+Private.h */; };
-		2C2BF9C52507360B002882AC /* MyRecord+Private.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C2BF9612507360B002882AC /* MyRecord+Private.h */; };
 		2C2BF9C62507360B002882AC /* Hello+Private.mm in Sources */ = {isa = PBXBuildFile; fileRef = 2C2BF9622507360B002882AC /* Hello+Private.mm */; };
-		2C2BF9C72507360B002882AC /* MyRecord+Private.mm in Sources */ = {isa = PBXBuildFile; fileRef = 2C2BF9632507360B002882AC /* MyRecord+Private.mm */; };
 		2C2BF9C82507360B002882AC /* Rc+Private.h in Headers */ = {isa = PBXBuildFile; fileRef = 2C2BF9642507360B002882AC /* Rc+Private.h */; };
-		2C3A55712588D35800F2558D /* json_record.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C3A556F2588D35800F2558D /* json_record.cpp */; };
-		2C3A55722588D35800F2558D /* json_record.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 2C3A55702588D35800F2558D /* json_record.hpp */; };
 		2CF9C09325885139000E394F /* rc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2CF9C08F25885139000E394F /* rc.cpp */; };
-		2CF9C09525885139000E394F /* my_record.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2CF9C09125885139000E394F /* my_record.cpp */; };
 		7C6655A8241371760054DA04 /* DjinniExample.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7C6655A1241371760054DA04 /* DjinniExample.framework */; };
 		7C6655A9241371760054DA04 /* DjinniExample.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 7C6655A1241371760054DA04 /* DjinniExample.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		7C665635241387050054DA04 /* hello_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C665633241387050054DA04 /* hello_impl.cpp */; };
@@ -69,28 +58,17 @@
 
 /* Begin PBXFileReference section */
 		1B4138E6D884AEE69A92E5BD /* Pods-DjinniExample.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DjinniExample.release.xcconfig"; path = "Target Support Files/Pods-DjinniExample/Pods-DjinniExample.release.xcconfig"; sourceTree = "<group>"; };
-		2C2BF9222507360B002882AC /* my_enum.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = my_enum.hpp; sourceTree = "<group>"; };
 		2C2BF9232507360B002882AC /* rc.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = rc.hpp; sourceTree = "<group>"; };
 		2C2BF9242507360B002882AC /* hello.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = hello.hpp; sourceTree = "<group>"; };
-		2C2BF9252507360B002882AC /* my_record.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = my_record.hpp; sourceTree = "<group>"; };
-		2C2BF9272507360B002882AC /* MyEnum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MyEnum.h; sourceTree = "<group>"; };
-		2C2BF9292507360B002882AC /* MyRecord+Internal.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "MyRecord+Internal.swift"; sourceTree = "<group>"; };
 		2C2BF92B2507360B002882AC /* DjinniExample.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DjinniExample.h; sourceTree = "<group>"; };
 		2C2BF92C2507360B002882AC /* Hello.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Hello.h; sourceTree = "<group>"; };
 		2C2BF92D2507360B002882AC /* Rc+Internal.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Rc+Internal.swift"; sourceTree = "<group>"; };
 		2C2BF92E2507360B002882AC /* Rc.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Rc.swift; sourceTree = "<group>"; };
-		2C2BF92F2507360B002882AC /* MyRecord.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MyRecord.swift; sourceTree = "<group>"; };
 		2C2BF95E2507360B002882AC /* Rc+Private.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = "Rc+Private.mm"; sourceTree = "<group>"; };
 		2C2BF95F2507360B002882AC /* Hello+Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Hello+Private.h"; sourceTree = "<group>"; };
-		2C2BF9602507360B002882AC /* MyEnum+Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "MyEnum+Private.h"; sourceTree = "<group>"; };
-		2C2BF9612507360B002882AC /* MyRecord+Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "MyRecord+Private.h"; sourceTree = "<group>"; };
 		2C2BF9622507360B002882AC /* Hello+Private.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = "Hello+Private.mm"; sourceTree = "<group>"; };
-		2C2BF9632507360B002882AC /* MyRecord+Private.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = "MyRecord+Private.mm"; sourceTree = "<group>"; };
 		2C2BF9642507360B002882AC /* Rc+Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Rc+Private.h"; sourceTree = "<group>"; };
-		2C3A556F2588D35800F2558D /* json_record.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = json_record.cpp; sourceTree = "<group>"; };
-		2C3A55702588D35800F2558D /* json_record.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = json_record.hpp; sourceTree = "<group>"; };
 		2CF9C08F25885139000E394F /* rc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rc.cpp; sourceTree = "<group>"; };
-		2CF9C09125885139000E394F /* my_record.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = my_record.cpp; sourceTree = "<group>"; };
 		36D4770B944237FFD6AE4609 /* Pods_djinni_ios_example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_djinni_ios_example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		40D6A2339CA5949B9590AD88 /* Pods-djinni_ios_example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-djinni_ios_example.release.xcconfig"; path = "Target Support Files/Pods-djinni_ios_example/Pods-djinni_ios_example.release.xcconfig"; sourceTree = "<group>"; };
 		4F0EBAB7CCC9BA3F8B97BD49 /* Pods-djinni_ios_example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-djinni_ios_example.debug.xcconfig"; path = "Target Support Files/Pods-djinni_ios_example/Pods-djinni_ios_example.debug.xcconfig"; sourceTree = "<group>"; };
@@ -148,11 +126,6 @@
 			isa = PBXGroup;
 			children = (
 				2C2BF9242507360B002882AC /* hello.hpp */,
-				2C3A556F2588D35800F2558D /* json_record.cpp */,
-				2C3A55702588D35800F2558D /* json_record.hpp */,
-				2C2BF9222507360B002882AC /* my_enum.hpp */,
-				2CF9C09125885139000E394F /* my_record.cpp */,
-				2C2BF9252507360B002882AC /* my_record.hpp */,
 				2CF9C08F25885139000E394F /* rc.cpp */,
 				2C2BF9232507360B002882AC /* rc.hpp */,
 			);
@@ -164,9 +137,6 @@
 			children = (
 				2C2BF92B2507360B002882AC /* DjinniExample.h */,
 				2C2BF92C2507360B002882AC /* Hello.h */,
-				2C2BF9272507360B002882AC /* MyEnum.h */,
-				2C2BF92F2507360B002882AC /* MyRecord.swift */,
-				2C2BF9292507360B002882AC /* MyRecord+Internal.swift */,
 				2C2BF92E2507360B002882AC /* Rc.swift */,
 				2C2BF92D2507360B002882AC /* Rc+Internal.swift */,
 			);
@@ -178,9 +148,6 @@
 			children = (
 				2C2BF95F2507360B002882AC /* Hello+Private.h */,
 				2C2BF9622507360B002882AC /* Hello+Private.mm */,
-				2C2BF9602507360B002882AC /* MyEnum+Private.h */,
-				2C2BF9612507360B002882AC /* MyRecord+Private.h */,
-				2C2BF9632507360B002882AC /* MyRecord+Private.mm */,
 				2C2BF9642507360B002882AC /* Rc+Private.h */,
 				2C2BF95E2507360B002882AC /* Rc+Private.mm */,
 			);
@@ -261,16 +228,10 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2C2BF98D2507360B002882AC /* my_record.hpp in Headers */,
-				2C2BF9C42507360B002882AC /* MyEnum+Private.h in Headers */,
 				2C2BF9C32507360B002882AC /* Hello+Private.h in Headers */,
 				2C2BF9C82507360B002882AC /* Rc+Private.h in Headers */,
 				7C665636241387050054DA04 /* hello_impl.hpp in Headers */,
-				2C2BF98A2507360B002882AC /* my_enum.hpp in Headers */,
-				2C2BF98E2507360B002882AC /* MyEnum.h in Headers */,
 				2C2BF9922507360B002882AC /* DjinniExample.h in Headers */,
-				2C2BF9C52507360B002882AC /* MyRecord+Private.h in Headers */,
-				2C3A55722588D35800F2558D /* json_record.hpp in Headers */,
 				2C2BF9932507360B002882AC /* Hello.h in Headers */,
 				2C2BF98B2507360B002882AC /* rc.hpp in Headers */,
 				2C2BF98C2507360B002882AC /* hello.hpp in Headers */,
@@ -446,17 +407,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2CF9C09525885139000E394F /* my_record.cpp in Sources */,
 				2C2BF9C22507360B002882AC /* Rc+Private.mm in Sources */,
 				2C2BF9942507360B002882AC /* Rc+Internal.swift in Sources */,
 				2C2BF9C62507360B002882AC /* Hello+Private.mm in Sources */,
-				2C3A55712588D35800F2558D /* json_record.cpp in Sources */,
-				2C2BF9C72507360B002882AC /* MyRecord+Private.mm in Sources */,
 				7C665635241387050054DA04 /* hello_impl.cpp in Sources */,
 				2C2BF9952507360B002882AC /* Rc.swift in Sources */,
-				2C2BF9962507360B002882AC /* MyRecord.swift in Sources */,
 				2CF9C09325885139000E394F /* rc.cpp in Sources */,
-				2C2BF9902507360B002882AC /* MyRecord+Internal.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

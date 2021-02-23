@@ -1,31 +1,3 @@
-
-hien = record {
-    val: i8;
-}
-
-en = enum {
-    a;
-    b;
-    c;
-}
-
-rc = record {
-    a: i32;
-    b: i32;
-    c: u32;
-    d: string;
-    list_16: list<i16>;
-    list: list<i32>;
-    list8: list<i8>;
-    list_hien: list<hien>;
-    o: optional<u16>;
-    o1: optional<hien>;
-    e1: en;
-    e2: optional<en>;
-}
-
-hello = interface +c {
-    static create(): hello;
-    static create_with_rc(r: rc): hello;
-    print(r: rc);
+kkk = interface +c {
+    static print(r: u8): u8;
 }
