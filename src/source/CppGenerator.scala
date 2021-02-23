@@ -195,6 +195,15 @@ class CppGenerator(spec: Spec) extends Generator(spec) {
     }
   }
 
+  def generate_json_extension(): Unit = {
+
+    val fileName = "cpp_record_json_extension"
+
+    if (!Generator.writtenFiles.contains((fileName + ".h").toLowerCase())) {
+      Generator.writtenFiles.put((fileName + ".h").toLowerCase(), fileName)
+    }
+  }
+
   override def generateRecord(origin: String, ident: Ident, doc: Doc, params: Seq[TypeParam], r: Record, deprecated: scala.Option[Deprecated], idl: Seq[TypeDecl]) {
     val refs = new CppRefs(ident.name)
     r.fields.foreach(f => refs.find(f.ty, forwardDeclareOnly = false))
@@ -202,8 +211,6 @@ class CppGenerator(spec: Spec) extends Generator(spec) {
 
     refs.hpp.add("#include <utility>") // Add for std::move
     refs.hpp.add("#include <string>") // Add for std::string
-//    refs.hpp.add("#include <json.hpp>")
-//    refs.hpp.add("#include <json+extension.hpp>")
 
     val self = marshal.typename(ident, r)
     val (cppName, cppFinal) = if (r.ext.cpp) (ident.name + "_base", "") else (ident.name, "")
@@ -304,7 +311,6 @@ class CppGenerator(spec: Spec) extends Generator(spec) {
           w.wl(s"$actualSelf& operator=(const $actualSelf&) = default;")
           w.wl(s"$actualSelf& operator=($actualSelf&&) = default;")
         }
-
 //        superRecord match {
 //          case None => w.wl("virtual std::string description() const;")
 //          case Some(value) => w.wl("std::string description() const override;")
@@ -317,48 +323,44 @@ class CppGenerator(spec: Spec) extends Generator(spec) {
       val recordSelf = marshal.fqTypename(ident, r)
       w.w("namespace nlohmann").braced {
         w.wl("template <>")
-        w.w(s"struct adl_serializer<${recordSelf}> ").braced {
+        w.w(s"struct adl_serializer<$recordSelf> ").bracedEnd(";") {
           // From JSON
           w.w(s"static $recordSelf from_json(const json & j) ").braced {
-            w.wl(s"auto result = ${recordSelf}();")
+            w.wl(s"auto result = $recordSelf();")
             for (i <- fields.indices) {
               val name = idCpp.field(fields(i).ident)
               fields(i).ty.resolved.base match {
                 case df: MDef => df.defType match {
                   case DRecord =>
-                    w.w(s"""if (j.contains("${name}"))""").braced {
-                      w.wl(s"""result.${name} = j.at("${name}").get<${marshal.fqTypename(fields(i).ty)}>();""")
+                    w.w(s"""if (j.contains("$name"))""").braced {
+                      w.wl(s"""result.$name = j.at("$name").get<${marshal.fqTypename(fields(i).ty)}>();""")
                     }
                   case _ =>
                 }
                 case _ =>
-                  w.w(s"""if (j.contains("${name}"))""").braced {
-                    w.wl(s"""j.at("${name}").get_to(result.${name});""")
+                  w.w(s"""if (j.contains("$name"))""").braced {
+                    w.wl(s"""j.at("$name").get_to(result.$name);""")
                   }
               }
             }
             w.wl("return result;")
           }
           // To JSON
-          w.w(s"static void to_json(json & j, $recordSelf item) ").braced {
-            w.w(s"j = json").braced {
+          w.w(s"static void to_json(json & j, const $recordSelf & item) ").braced {
+            w.w(s"j = json").bracedEnd(";") {
               for (i <- fields.indices) {
                 val name = idCpp.field(fields(i).ident)
-                val comma = if (i < (fields).length - 1) "," else ""
-
+                val comma = if (i < fields.length - 1) "," else ""
                 fields(i).ty.resolved.base match {
-                  case _ => w.wl(s"""{"${name}", item.${name}}${comma}""")
+                  case _ => w.wl(s"""{"$name", item.$name}$comma""")
                 }
               }
             }
-            w.wl(";")
           }
         }
-        w.wl(";")
       }
     }
 
-//    writeHppFile(cppName, origin, refs.hpp, refs.hppFwds, writeCppPrototype, writeJsonExtension)
     writeHppFile(cppName, origin, refs.hpp, refs.hppFwds, writeCppPrototype)
 
     // if (r.consts.nonEmpty || r.derivingTypes.contains(DerivingType.Eq) || r.derivingTypes.contains(DerivingType.Ord)) {
@@ -418,6 +420,12 @@ class CppGenerator(spec: Spec) extends Generator(spec) {
 //        w.wl("return ((nlohmann::json)(*this)).dump(2);")
 //      }
     })
+
+    refs.hpp.add("#include " + q(spec.cppExtendedRecordIncludePrefix + spec.cppFileIdentStyle(ident + "." + spec.cppHeaderExt)))
+    refs.hpp.add("#include " + q("json.hpp"))
+    refs.hpp.add("#include " + q("json+extension.hpp"))
+
+    writeHppFile(s"$cppName+json", origin, refs.hpp, refs.hppFwds, _ => {}, writeJsonExtension)
   }
 
   override def generateInterface(origin: String, ident: Ident, doc: Doc, typeParams: Seq[TypeParam], i: Interface, deprecated: scala.Option[Deprecated]) {
