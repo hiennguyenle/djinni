@@ -166,6 +166,12 @@ class CgoWrapperGenerator(spec: Spec) extends Generator(spec) {
             w.wl(s"for (int i = 0; i < cgo.length; i++)").bracedSemi {
               w.wl(s"cgo.data[i] = $className::from_cpp(data[i]);")
             }
+          case MBinary =>
+            w.wl(s"cgo.data = new $cgo_type_name[cgo.length];")
+            val className = "DjinniBinary"
+            w.wl(s"for (int i = 0; i < cgo.length; i++)").bracedSemi {
+              w.wl(s"cgo.data[i] = $className::from_cpp(data[i]);")
+            }
           case d: MDef => d.defType match {
             case DInterface => throw new NotImplementedError()
             case DRecord =>
@@ -186,6 +192,13 @@ class CgoWrapperGenerator(spec: Spec) extends Generator(spec) {
           case _: MPrimitive => w.wl(s"return $cpp_type_name(cgo.data, cgo.data + cgo.length);")
           case MString =>
             val className = "DjinniString"
+            w.wl(s"$cpp_type_name cpp = $cpp_type_name(cgo.length);")
+            w.wl(s"for (int i = 0; i < cpp.size(); i++)").braced {
+              w.wl(s"cpp[i] = $className::to_cpp(cgo.data[i]);")
+            }
+            w.wl(s"return cpp;")
+          case MBinary =>
+            val className = "DjinniBinary"
             w.wl(s"$cpp_type_name cpp = $cpp_type_name(cgo.length);")
             w.wl(s"for (int i = 0; i < cpp.size(); i++)").braced {
               w.wl(s"cpp[i] = $className::to_cpp(cgo.data[i]);")

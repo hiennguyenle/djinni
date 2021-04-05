@@ -6,19 +6,22 @@ def get_libary_version
 end
 
 lane :submit_podspecs do
-
-    version_bump_podspec(path: "DjinniSwift.podspec", version_number: get_libary_version)
     version_bump_podspec(path: "Djinni.podspec", version_number: get_libary_version)
-
-    pod_push(path: "DjinniSwift.podspec",
-        repo: "misfit-podspecs",
-        allow_warnings: true,
-        verbose: true)
 
     pod_push(path: "Djinni.podspec",
         repo: "misfit-podspecs",
         allow_warnings: true,
         skip_import_validation: true,
+        use_libraries: true,
         verbose: true)
-end
 
+    # version_bump_podspec(path: "DjinniSwift.podspec", version_number: get_libary_version)
+    # pod_push(path: "DjinniSwift.podspec",
+    #     repo: "misfit-podspecs",
+    #     sources: ['git@bitbucket.org:misfitwearablesinc/misfit-podspecs.git','https://github.com/CocoaPods/Specs.git'],
+    #     allow_warnings: true,
+    #     verbose: true,
+    #     skip_import_validation: true,
+    #     use_libraries: true)
+
+end
