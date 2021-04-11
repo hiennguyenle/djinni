@@ -1,18 +1,18 @@
 /**
- * Copyright 2014 Dropbox, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+  * Copyright 2014 Dropbox, Inc.
+  *
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+  * You may obtain a copy of the License at
+  *
+  * http://www.apache.org/licenses/LICENSE-2.0
+  *
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
+  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
+  */
 
 package djinni
 
@@ -32,6 +32,9 @@ class CppGenerator(spec: Spec) extends Generator(spec) {
 
   private def writeHppFile(name: String, origin: String, includes: Iterable[String], fwds: Iterable[String], f: IndentWriter => Unit, f2: IndentWriter => Unit = (w => {})): Unit =
     writeHppFileGeneric(spec.cppHeaderOutFolder.get, spec.cppNamespace, spec.cppFileIdentStyle)(name, origin, includes, fwds, f, f2)
+
+  private def writeHppJsonFile(name: String, origin: String, cppNamespace: String, includes: Iterable[String], fwds: Iterable[String], f: IndentWriter => Unit): Unit =
+    writeHppFileGeneric(spec.cppHeaderOutFolder.get, cppNamespace, spec.cppFileIdentStyle)(name, origin, includes, fwds, f, (w => {}))
 
   class CppRefs(name: String) {
     var hpp = mutable.TreeSet[String]()
@@ -212,11 +215,14 @@ class CppGenerator(spec: Spec) extends Generator(spec) {
     refs.hpp.add("#include <utility>") // Add for std::move
     refs.hpp.add("#include <string>") // Add for std::string
 
-    refs.hpp.add("#include " + q("json.hpp"))
-    refs.hpp.add("#include " + q("json+extension.hpp"))
-
     val self = marshal.typename(ident, r)
     val (cppName, cppFinal) = if (r.ext.cpp) (ident.name + "_base", "") else (ident.name, "")
+
+
+    if (spec.cppJsonExtension) {
+      refs.hpp.add("#include " + q("json.hpp"))
+      refs.cpp.add("#include " + q(s"$cppName+json.hpp"))
+    }
 
     val actualSelf = marshal.typename(cppName, r)
     // Requiring the extended class
@@ -248,10 +254,10 @@ class CppGenerator(spec: Spec) extends Generator(spec) {
         w.wl
         w.wl
       }
-
       writeDoc(w, doc)
 
       writeCppTypeParams(w, params)
+
       w.w("struct ")
       marshal.deprecatedAnnotation(deprecated).foreach(w.w)
       w.w(" " + actualSelf + marshal.extendsRecord(idl, r) + cppFinal).bracedSemi {
@@ -314,18 +320,26 @@ class CppGenerator(spec: Spec) extends Generator(spec) {
           w.wl(s"$actualSelf& operator=(const $actualSelf&) = default;")
           w.wl(s"$actualSelf& operator=($actualSelf&&) = default;")
         }
-
-        superRecord match {
-          case None => w.wl("virtual nlohmann::json to_json() const;")
-          case Some(_) => w.wl("nlohmann::json to_json() const override;")
+        if (spec.cppJsonExtension) {
+          superRecord match {
+            case None => w.wl("virtual nlohmann::json to_json() const;")
+            case Some(_) => w.wl("nlohmann::json to_json() const override;")
+          }
         }
       }
     }
 
-    def writeJsonExtension(w: IndentWriter) {
-      w.wl
-      val recordSelf = marshal.fqTypename(ident, r)
-      w.w("namespace nlohmann").braced {
+    writeHppFile(cppName, origin, refs.hpp, refs.hppFwds, writeCppPrototype)
+
+    if (spec.cppJsonExtension) {
+      // C++ Json Header
+      val jsonRefs = new CppRefs(ident.name)
+      jsonRefs.hpp.add("#include " + q("json.hpp"))
+      jsonRefs.hpp.add("#include " + q("json+extension.hpp"))
+      jsonRefs.hpp.add("#include " + q(spec.cppExtendedRecordIncludePrefix + spec.cppFileIdentStyle(ident) + "." + spec.cppHeaderExt))
+
+      writeHppJsonFile(s"$cppName+json", origin, "nlohmann", jsonRefs.hpp, jsonRefs.hppFwds, w => {
+        val recordSelf = marshal.fqTypename(ident, r)
         w.wl("template <>")
         w.w(s"struct adl_serializer<$recordSelf> ").bracedEnd(";") {
           // From JSON
@@ -362,10 +376,8 @@ class CppGenerator(spec: Spec) extends Generator(spec) {
             }
           }
         }
-      }
+      })
     }
-
-    writeHppFile(cppName, origin, refs.hpp, refs.hppFwds, writeCppPrototype, writeJsonExtension)
 
     // if (r.consts.nonEmpty || r.derivingTypes.contains(DerivingType.Eq) || r.derivingTypes.contains(DerivingType.Ord)) {
     writeCppFile(cppName, origin, refs.cpp, w => {
@@ -419,9 +431,10 @@ class CppGenerator(spec: Spec) extends Generator(spec) {
           w.wl("return !(lhs < rhs);")
         }
       }
-
-      w.w(s"nlohmann::json $actualSelf::to_json() const").braced {
-        w.wl("return ((nlohmann::json)(*this));")
+      if (spec.cppJsonExtension) {
+        w.w(s"nlohmann::json $actualSelf::to_json() const").braced {
+          w.wl("return ((nlohmann::json)(*this));")
+        }
       }
     })
   }

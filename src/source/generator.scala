@@ -17,14 +17,13 @@
 package djinni
 
 import java.io._
-
 import djinni.ast._
 import djinni.generatorTools.{JavaAccessModifier, _}
 import djinni.writer.IndentWriter
 
 import scala.annotation.tailrec
 import scala.collection.mutable
-import scala.language.implicitConversions
+import scala.language.{implicitConversions, postfixOps}
 import scala.util.matching.Regex
 
 package object generatorTools {
@@ -228,7 +227,8 @@ package object generatorTools {
                    swiftIdentStyle: SwiftIdentStyle,
                    swiftOutFolder: Option[File],
                    swiftGeneratedHeader: Option[String],
-                   cgoWrapperOutFolder: Option[File])
+                   cgoWrapperOutFolder: Option[File],
+                   cppJsonExtension: Boolean)
 
   case class CppIdentStyle(ty: IdentConverter, enumType: IdentConverter, typeParam: IdentConverter,
                            method: IdentConverter, field: IdentConverter, local: IdentConverter,
