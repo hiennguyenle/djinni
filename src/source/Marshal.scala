@@ -17,6 +17,7 @@ abstract class Marshal(spec: Spec) {
   protected val idObjc = spec.objcIdentStyle
   protected val idPython = spec.pyIdentStyle
   protected val idSwift = spec.swiftIdentStyle
+  protected val idCgo = spec.cppIdentStyle
 
   def typename(name: String, ty: TypeDef): String
 

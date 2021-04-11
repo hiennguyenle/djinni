@@ -142,7 +142,7 @@ class ObjcppGenerator(spec: Spec) extends BaseObjcGenerator(spec) {
       refs.body.add("#include <utility>")
       refs.body.add("#include <exception>")
     }
-    if (!spec.cppNnType.isEmpty || !spec.cppNnCheckExpression.nonEmpty) {
+    if (spec.cppNnType.isDefined || spec.cppNnCheckExpression.isEmpty) {
       refs.body.add("#include <stdexcept>")
     }
     

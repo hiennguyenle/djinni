@@ -194,7 +194,6 @@ class SwiftMarshal(spec: Spec) extends Marshal(spec) {
             case "f32" => swiftHelper("F32")
             case "f64" => swiftHelper("F64")
             case "bool" => swiftHelper("Bool")
-
             case "u8" => swiftHelper("U8")
             case "u16" => swiftHelper("U16")
             case "u32" => swiftHelper("U32")
