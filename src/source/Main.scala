@@ -101,6 +101,7 @@ object Main {
     var swiftOutFolder: Option[File] = None
     var swiftGeneratedHeader: Option[String] = None
     var cgoWrapperOutFolder: Option[File] = None
+    var cppJsonExtension: Boolean = true
 
     val argParser: OptionParser[Unit] = new scopt.OptionParser[Unit]("djinni") {
       def identStyle(optionName: String, update: IdentConverter => Unit): OptionDef[String, Unit] = {
@@ -265,6 +266,9 @@ object Main {
         .text("The output folder for Wrapper C files (Generator disabled if unspecified).")
       opt[String]("py-import-prefix").valueName("<import-prefix>").foreach(pyImportPrefix = _)
         .text("The import prefix used within python genereated files (default: \"\")")
+      opt[Boolean]("cpp-json-extension").valueName("<true/false>").foreach(x => cppJsonExtension = x)
+        .text("Way of specifying if file generation should be skipped (default: false)")
+
 
       note("\nIdentifier styles (ex: \"FooBar\", \"fooBar\", \"foo_bar\", \"FOO_BAR\", \"m_fooBar\")\n")
       identStyle("ident-java-enum", c => {
@@ -502,7 +506,8 @@ object Main {
       swiftIdentStyle,
       swiftOutFolder,
       swiftGeneratedHeader,
-      cgoWrapperOutFolder
+      cgoWrapperOutFolder,
+      cppJsonExtension
     )
 
     try {
