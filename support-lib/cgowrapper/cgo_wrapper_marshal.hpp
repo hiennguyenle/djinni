@@ -27,10 +27,12 @@ struct DjinniBinary {
 template<typename T>
 struct DjinniCgoOptional {
     
-    static T* from_cpp(const std::optional<T> & cpp) {
+    static std::shared_ptr<T> from_cpp(const std::optional<T> & cpp) {
         if (cpp.has_value()) {
-            return const_cast<T *>(&(*cpp));
+            T val = std::move(cpp.value());
+            return std::make_shared<T>(val);
         }
+        
         return NULL;
     }
     

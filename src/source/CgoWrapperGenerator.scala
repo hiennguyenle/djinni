@@ -428,8 +428,7 @@ class CgoWrapperGenerator(spec: Spec) extends Generator(spec) {
                 w.wl(s"$ret;")
               }
             }
-          }
-          else {
+          } else {
             val cppRef = cppMarshal.fqTypename(ident.name, i)
             w.wl(s"$cppRef * ptr = reinterpret_cast<$cppRef*>(cgo_this);")
             val params = m.params.map(p => marshal.toCpp(p.ty, idCpp.field(p.ident)))
@@ -558,7 +557,7 @@ class CgoWrapperGenerator(spec: Spec) extends Generator(spec) {
       w.wl
       w.wl(s"std::optional<$cgo_type_name> $className::from_cpp(const std::optional<$cpp_type_name> & cpp)").bracedSemi {
         w.wl(s"if (cpp.has_value())").braced {
-          w.wl(s"return $className::from_cpp(cpp.value());")
+          w.wl(s"return $className::from_cpp(std::move(cpp.value()));")
         }
         w.wl("return std::nullopt;")
       }

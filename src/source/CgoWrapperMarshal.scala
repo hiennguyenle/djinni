@@ -160,16 +160,16 @@ class CgoWrapperMarshal(spec: Spec) extends Marshal(spec) { // modeled(pretty mu
         def base(m: Meta): String = m match {
             case opaque: MOpaque => opaque match {
                 case p: MPrimitive =>s"std::move($expr)"
-                case meta.MString => s"DjinniString::from_cpp($expr)"
+                case meta.MString => s"DjinniString::from_cpp(std::move($expr))"
                 case meta.MList =>
                     val cppHelperClass = s"$djinniWrapper" + idCpp.typeParam(cgoWrapperType(tm))
-                    s"$cppHelperClass::from_cpp($expr)"
+                    s"$cppHelperClass::from_cpp(std::move($expr))"
                 case meta.MDate => throw new NotImplementedError()
-                case meta.MBinary => s"DjinniBinary::from_cpp($expr)"
+                case meta.MBinary => s"DjinniBinary::from_cpp(std::move($expr))"
                 case meta.MOptional =>
                     val baseField = tm.args.head
                     val cgoReturnType = cgoWrapperType(baseField)
-                    s"DjinniCgoOptional<$cgoReturnType>::from_cpp(${base(baseField.base)})"
+                    s"DjinniCgoOptional<$cgoReturnType>::from_cpp(${base(baseField.base)}).get()"
                 case meta.MSet => throw new NotImplementedError()
                 case meta.MMap => throw new NotImplementedError()
                 case meta.MJson => throw new NotImplementedError()
@@ -178,11 +178,11 @@ class CgoWrapperMarshal(spec: Spec) extends Marshal(spec) { // modeled(pretty mu
             case d: MDef => d.defType match {
                 case meta.DEnum =>
                     val cppHelperClass = s"$djinniWrapper" + idCpp.typeParam(cgo + d.name)
-                    s"$cppHelperClass::from_cpp($expr)"
+                    s"$cppHelperClass::from_cpp(std::move($expr))"
                 case meta.DInterface => throw new NotImplementedError()
                 case meta.DRecord =>
                     val cppHelperClass = s"$djinniWrapper" + idCpp.typeParam(cgo + d.name)
-                    s"$cppHelperClass::from_cpp($expr)"
+                    s"$cppHelperClass::from_cpp(std::move($expr))"
             }
             case e: MExtern => throw new NotImplementedError()
         }
