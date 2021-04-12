@@ -131,7 +131,7 @@ class CppMarshal(spec: Spec) extends Marshal(spec) {
 
   override def fromCpp(tm: MExpr, expr: String): String = throw new AssertionError("cpp to cpp conversion")
 
-  def hppReferences(m: Meta, exclude: String, forwardDeclareOnly: Boolean): Seq[SymbolReference] = m match {
+  def hppReferences(m: Meta, exclude: String, forwardDeclareOnly: Boolean, extension: String = ""): Seq[SymbolReference] = m match {
     case p: MPrimitive => p.idlName match {
       case "i8" | "u8" | "i16" | "u16" | "u32" | "i32" | "i64" => List(ImportRef("<cstdint>"))
       case _ => List()
@@ -150,7 +150,7 @@ class CppMarshal(spec: Spec) extends Marshal(spec) {
           if (forwardDeclareOnly) {
             List(DeclRef(s"struct ${typename(d.name, d.body)};", Some(spec.cppNamespace)))
           } else {
-            List(ImportRef(include(d.name, r.ext.cpp)))
+            List(ImportRef(include(d.name, r.ext.cpp, extension)))
           }
         } else {
           List()
@@ -192,9 +192,9 @@ class CppMarshal(spec: Spec) extends Marshal(spec) {
     case r: Record => idCpp.ty(name)
   }
 
-  def include(ident: String, isExtendedRecord: Boolean = false): String = {
+  def include(ident: String, isExtendedRecord: Boolean = false, extension: String = ""): String = {
     val prefix = if (isExtendedRecord) spec.cppExtendedRecordIncludePrefix else spec.cppIncludePrefix
-    q(prefix + spec.cppFileIdentStyle(ident) + "." + spec.cppHeaderExt)
+    q(prefix + spec.cppFileIdentStyle(ident) + s"$extension." + spec.cppHeaderExt)
   }
 
   def cppReferences(m: Meta, exclude: String, forwardDeclareOnly: Boolean): Seq[SymbolReference] = {

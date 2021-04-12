@@ -36,8 +36,8 @@ class CppGenerator(spec: Spec) extends Generator(spec) {
   private def writeHppJsonFile(name: String, origin: String, cppNamespace: String, includes: Iterable[String], fwds: Iterable[String], f: IndentWriter => Unit): Unit =
     writeHppFileGeneric(spec.cppHeaderOutFolder.get, cppNamespace, spec.cppFileIdentStyle)(name, origin, includes, fwds, f, (w => {}))
 
-  class CppRefs(name: String) {
-    var hpp = mutable.TreeSet[String]()
+  class CppRefs(name: String, extension: String = "") {
+    var hpp: mutable.Set[String] = mutable.TreeSet[String]()
     var hppFwds = mutable.TreeSet[String]()
     var cpp = mutable.TreeSet[String]()
 
@@ -51,7 +51,7 @@ class CppGenerator(spec: Spec) extends Generator(spec) {
     }
 
     def find(m: Meta, forwardDeclareOnly: Boolean): Unit = {
-      for (r <- marshal.hppReferences(m, name, forwardDeclareOnly)) r match {
+      for (r <- marshal.hppReferences(m, name, forwardDeclareOnly, extension)) r match {
         case ImportRef(arg) => hpp.add("#include " + arg)
         case DeclRef(decl, Some(spec.cppNamespace)) => hppFwds.add(decl)
         case DeclRef(_, _) =>
@@ -333,10 +333,18 @@ class CppGenerator(spec: Spec) extends Generator(spec) {
 
     if (spec.cppJsonExtension) {
       // C++ Json Header
-      val jsonRefs = new CppRefs(ident.name)
+      val jsonRefs = new CppRefs(ident.name, "+json")
       jsonRefs.hpp.add("#include " + q("json.hpp"))
       jsonRefs.hpp.add("#include " + q("json+extension.hpp"))
       jsonRefs.hpp.add("#include " + q(spec.cppExtendedRecordIncludePrefix + spec.cppFileIdentStyle(ident) + "." + spec.cppHeaderExt))
+
+      r.fields.foreach(f => jsonRefs.find(f.ty, forwardDeclareOnly = false))
+
+      superRecord match {
+        case None =>
+        case Some(value) =>
+          jsonRefs.hpp.add("#include " + q(spec.cppExtendedRecordIncludePrefix + spec.cppFileIdentStyle(value.ident + "+json." + spec.cppHeaderExt)))
+      }
 
       writeHppJsonFile(s"$cppName+json", origin, "nlohmann", jsonRefs.hpp, jsonRefs.hppFwds, w => {
         val recordSelf = marshal.fqTypename(ident, r)
