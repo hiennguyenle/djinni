@@ -27,7 +27,7 @@ class CgoWrapperMarshal(spec: Spec) extends Marshal(spec) { // modeled(pretty mu
 
     override def fqReturnType(ret: Option[TypeRef]): String = throw new NotImplementedError()
 
-    override def fieldType(tm: djinni.meta.MExpr): String = toCwrapperType(tm, false)
+    override def fieldType(tm: djinni.meta.MExpr): String = toCwrapperType(tm, forHeader = false)
 
     override def fqFieldType(tm: djinni.meta.MExpr): String = throw new NotImplementedError()
 
@@ -45,7 +45,8 @@ class CgoWrapperMarshal(spec: Spec) extends Marshal(spec) { // modeled(pretty mu
             args.mkString("(", ", ", ")")
         }
     }
-    def toCwrapperType(tm: MExpr, forHeader: Boolean): String = {
+
+    private def toCwrapperType(tm: MExpr, forHeader: Boolean): String = {
         def base(m: Meta): String = {
             val structPrefix = if (forHeader) "struct " else ""
             m match {
@@ -53,11 +54,17 @@ class CgoWrapperMarshal(spec: Spec) extends Marshal(spec) { // modeled(pretty mu
                 case MDate => "uint64_t"
                 case MString => structPrefix + cgo + "string"
                 case MBinary => structPrefix + cgo + "binary"
-                case MList => structPrefix + cgo + "list__" + base(tm.args.head.base)
-                case MSet | MMap => structPrefix + djinniObjectHandle + " *"
+                case MList =>
+                    val returnType = base(tm.args.head.base)
+                    val result = structPrefix + cgo + "list__" + returnType
+                    if (returnType.endsWith("*"))
+                        result
+                    else
+                        result + " *"
+                case MSet | MMap => throw new NotImplementedError()
                 case MOptional => tm.args.head.base match {
                     case p: MPrimitive => p.cName + " *"
-                    case MList | MSet | MMap => structPrefix + "DjinniOptionalObjectHandle *"
+                    case MList | MSet | MMap => throw new NotImplementedError()
                     case d: MDef =>
                         d.defType match {
                             case DRecord | DEnum => s"$cgo${d.name} *"
@@ -67,9 +74,8 @@ class CgoWrapperMarshal(spec: Spec) extends Marshal(spec) { // modeled(pretty mu
                 }
                 case d: MDef =>
                     d.defType match {
-                        case DEnum | DRecord => cgo + d.name
-                        case DInterface => cgo + d.name + " *"
-
+                        case DEnum => cgo + d.name
+                        case DInterface | DRecord => cgo + d.name + " *"
                     }
                 case p: MParam => idCpp.typeParam(p.name)
                 case e: MExtern => throw new NotImplementedError()
@@ -109,9 +115,9 @@ class CgoWrapperMarshal(spec: Spec) extends Marshal(spec) { // modeled(pretty mu
             case _ => List()
         }
         case MDate => List(ImportRef("<chrono>"))
-        case MList => List(ImportRef("<vector>"))
+        case MList => List(ImportRef("<vector>"), ImportRef("<memory>"))
         case MString => List(ImportRef("<string>"))
-        case MBinary => List(ImportRef("<vector>"), ImportRef("<stdint.h>"))
+        case MBinary => List(ImportRef("<vector>"), ImportRef("<stdint.h>"), ImportRef("<memory>"))
         case MOptional => List(ImportRef(spec.cppOptionalHeader))
         case d: MDef => d.defType match {
             case DInterface => List(ImportRef("<memory>"))
@@ -123,14 +129,40 @@ class CgoWrapperMarshal(spec: Spec) extends Marshal(spec) { // modeled(pretty mu
         case _ => List()
     }
 
-    def cgoWrapperType(tm: MExpr): String = {
+    def cgoWrapperTypeName(tm: MExpr): String = {
         def find(m: Meta): String = m match {
             case p: MPrimitive => p.cName
             case MString => cgo + "string"
             case MBinary => cgo + "binary"
             case d: MDef =>
                 d.defType match {
-                    case DRecord | DEnum => cgo + d.name
+                    case DEnum => cgo + d.name
+                    case DRecord => cgo + d.name
+                    case DInterface => "interface_" + d.name
+                }
+            case p: MParam => idCpp.typeParam(p.name)
+            case e: MExtern => "extern"
+            case MOptional => tm.args.head.base match {
+                case mp: MPrimitive => "boxed"
+                case _ => "optional"
+            }
+            case MList =>
+                val field_name = find(tm.args.head.base)
+                cgo + "list__" + field_name
+            case _ => m.asInstanceOf[MOpaque].idlName
+        }
+
+        find(tm.base)
+    }
+    def cgoWrapperType(tm: MExpr): String = {
+        def find(m: Meta): String = m match {
+            case p: MPrimitive => p.cName
+            case MString => cgo + "string" + "*"
+            case MBinary => cgo + "binary" + "*"
+            case d: MDef =>
+                d.defType match {
+                    case DEnum => cgo + d.name
+                    case DRecord => cgo + d.name + "*"
                     case DInterface => "interface_" + d.name
                 }
             case p: MParam => idCpp.typeParam(p.name)
@@ -157,24 +189,27 @@ class CgoWrapperMarshal(spec: Spec) extends Marshal(spec) { // modeled(pretty mu
     }
 
     override def fromCpp(tm: MExpr, expr: String): String = {
-        def base(m: Meta): String = m match {
+        def base(m: Meta, boxed: Boolean = false): String = m match {
             case opaque: MOpaque => opaque match {
-                case p: MPrimitive =>s"std::move($expr)"
+                case p: MPrimitive =>
+                    if (boxed)
+                        s"CgoPrimitive<${p.cName}>::from_cpp($expr).release()"
+                    else
+                        expr
                 case meta.MString => s"DjinniString::from_cpp(std::move($expr))"
                 case meta.MList =>
-                    val cppHelperClass = s"$djinniWrapper" + idCpp.typeParam(cgoWrapperType(tm))
-                    s"$cppHelperClass::from_cpp(std::move($expr))"
+                    val cppHelperClass = s"$djinniWrapper" + idCpp.typeParam(cgoWrapperTypeName(tm))
+                    s"$cppHelperClass::from_cpp(std::move($expr)).release()"
                 case meta.MDate => throw new NotImplementedError()
                 case meta.MBinary => s"DjinniBinary::from_cpp(std::move($expr))"
                 case meta.MOptional =>
                     val baseField = tm.args.head
-                    val cgoReturnType = cgoWrapperType(baseField)
-                    s"DjinniCgoOptional<$cgoReturnType>::from_cpp(${base(baseField.base)}).get()"
+                    s"${base(baseField.base, boxed = true)}"
                 case meta.MSet => throw new NotImplementedError()
                 case meta.MMap => throw new NotImplementedError()
                 case meta.MJson => throw new NotImplementedError()
             }
-            case MParam(name) => throw new NotImplementedError()
+            case MParam(_) => throw new NotImplementedError()
             case d: MDef => d.defType match {
                 case meta.DEnum =>
                     val cppHelperClass = s"$djinniWrapper" + idCpp.typeParam(cgo + d.name)
@@ -182,7 +217,7 @@ class CgoWrapperMarshal(spec: Spec) extends Marshal(spec) { // modeled(pretty mu
                 case meta.DInterface => throw new NotImplementedError()
                 case meta.DRecord =>
                     val cppHelperClass = s"$djinniWrapper" + idCpp.typeParam(cgo + d.name)
-                    s"$cppHelperClass::from_cpp(std::move($expr))"
+                    s"$cppHelperClass::from_cpp(std::move($expr)).release()"
             }
             case e: MExtern => throw new NotImplementedError()
         }
@@ -191,26 +226,26 @@ class CgoWrapperMarshal(spec: Spec) extends Marshal(spec) { // modeled(pretty mu
     }
 
     override def toCpp(tm: MExpr, expr: String): String = {
-        def base(m: Meta): String = m match {
+        def base(m: Meta, boxed: Boolean = false): String = m match {
             case opaque: MOpaque => opaque match {
                 case p: MPrimitive =>s"std::move($expr)"
                 case meta.MString => s"DjinniString::to_cpp($expr)"
                 case meta.MList =>
-                    val cppHelperClass = s"$djinniWrapper" + idCpp.typeParam(cgoWrapperType(tm))
+                    val cppHelperClass = s"$djinniWrapper" + idCpp.typeParam(cgoWrapperTypeName(tm))
                     s"$cppHelperClass::to_cpp($expr)"
                 case meta.MDate => throw new NotImplementedError()
                 case meta.MBinary => s"DjinniBinary::to_cpp($expr)"
                 case meta.MOptional =>
                     val baseField = tm.args.head.base
                     baseField match {
-                        case p: MPrimitive =>s"DjinniCgoOptional<${p.cName}>::to_cpp(${base(baseField)})"
+                        case p: MPrimitive =>s"CgoPrimitive<${p.cName}>::to_cpp(${base(baseField)})"
                         case _ => s"${base(baseField)}"
                     }
                 case meta.MSet => throw new NotImplementedError()
                 case meta.MMap => throw new NotImplementedError()
                 case meta.MJson => throw new NotImplementedError()
             }
-            case MParam(name) => throw new NotImplementedError()
+            case MParam(_) => throw new NotImplementedError()
             case d: MDef => d.defType match {
                 case meta.DEnum =>
                     val cppHelperClass = s"$djinniWrapper" + idCpp.typeParam(cgo + d.name)
@@ -218,9 +253,9 @@ class CgoWrapperMarshal(spec: Spec) extends Marshal(spec) { // modeled(pretty mu
                 case meta.DInterface => throw new NotImplementedError()
                 case meta.DRecord =>
                     val cppHelperClass = s"$djinniWrapper" + idCpp.typeParam(cgo + d.name)
-                    s"$cppHelperClass::to_cpp($expr)"
+                    s"$cppHelperClass::to_cpp(*$expr)"
             }
-            case e: MExtern => throw new NotImplementedError()
+            case _: MExtern => throw new NotImplementedError()
         }
         base(tm.base)
     }
@@ -230,8 +265,8 @@ class CgoWrapperMarshal(spec: Spec) extends Marshal(spec) { // modeled(pretty mu
             case opaque: MOpaque => opaque match {
                 case meta.MString => Option(s"free_cgo_string(&($expr))")
                 case meta.MList =>
-                    val list_name = s"${cgoWrapperType(tm)}"
-                    Option(s"${list_name}__delete(&($expr))")
+                    val list_name = s"${cgoWrapperTypeName(tm)}"
+                    Option(s"${list_name}__delete($expr)")
                 case meta.MDate => throw new NotImplementedError()
                 case meta.MBinary => Option(s"free_cgo_binary(&($expr))")
                 case meta.MOptional =>
@@ -248,13 +283,7 @@ class CgoWrapperMarshal(spec: Spec) extends Marshal(spec) { // modeled(pretty mu
             case MParam(name) => throw new NotImplementedError()
             case d: MDef => d.defType match {
                 case meta.DRecord =>
-                    val cppHelperClass = s"$djinniWrapper" + idCpp.typeParam(cgo + d.name)
-                    val ptr = if (pointer) {
-                        s"$expr"
-                    } else {
-                        s"&($expr)"
-                    }
-                    Option(s"${cgo + d.name}__delete($ptr)")
+                    Option(s"${cgo + d.name}__delete($expr)")
                 case _ => null
             }
             case e: MExtern => throw new NotImplementedError()
