@@ -69,17 +69,15 @@ abstract class Marshal(spec: Spec) {
   def extendsRecord(idl: Seq[TypeDecl], record: Record): String = {
     record.baseRecord match {
       case None => ""
-      case Some(value) => {
+      case Some(value) =>
         idl.find(td => td.ident.name == value) match {
           case Some(superDec) => superDec.body match {
-            case br: Record => {
+            case br: Record =>
               extendsRecordFormat(typename(superDec.ident, br))
-            }
             case _ => throw new AssertionError("Unreachable. The parser throws an exception when extending a non-interface type.")
           }
           case _ => throw new AssertionError("Unreachable. The parser throws an exception when extending an interface that doesn't exist.")
         }
-      }
     }
   }
 

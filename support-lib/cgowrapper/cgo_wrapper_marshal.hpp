@@ -12,37 +12,43 @@
 #include <string>
 #include <vector>
 #include <optional>
+#include <memory>
 #include "cgo_wrapper_marshal.h"
 
 struct DjinniString {
     static cgo__string from_cpp(const std::string & str);
     static std::string to_cpp(const cgo__string & str);
+    static std::string to_cpp(cgo__string * str);
 };
 
 struct DjinniBinary {
     static cgo__binary from_cpp(const std::vector<uint8_t> & data);
     static std::vector<uint8_t> to_cpp(const cgo__binary & str);
+    static std::vector<uint8_t> to_cpp(cgo__binary * str);
 };
 
-template<typename T>
-struct DjinniCgoOptional {
-    
-    static std::shared_ptr<T> from_cpp(const std::optional<T> & cpp) {
-        if (cpp.has_value()) {
-            T val = std::move(cpp.value());
-            return std::make_shared<T>(val);
+// Optional Primitives Template
+template<class CppType>
+class CgoPrimitive {
+public:
+    static std::optional<CppType> to_cpp(CppType *dopt) {
+        if (dopt) {
+            return std::make_optional<CppType>(std::move(*dopt));
         }
-        
-        return NULL;
+        return std::nullopt;
     }
     
-    static std::optional<T> to_cpp(const T* cgo) {
-        if (cgo == NULL) {
-            return std::nullopt;
+    static std::unique_ptr<CppType> from_cpp(std::optional<CppType> copt) {
+        if (!copt.has_value()){
+            return nullptr;
         }
-        
-        return std::optional<T>(*cgo);
+        return std::make_unique<CppType>(std::move(*copt));
     }
 };
+
+
+
+
+
 
 #endif /* cgo_wrapper_marshal_hpp */

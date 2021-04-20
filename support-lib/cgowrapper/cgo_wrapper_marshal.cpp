@@ -15,6 +15,12 @@ std::string DjinniString::to_cpp(const cgo__string & str) {
     return std::string(str.str, str.length);
 }
 
+std::string DjinniString::to_cpp(cgo__string * str) {
+    return to_cpp(*str);
+}
+
+
+
 void free_cgo_string(cgo__string * ptr) {
     delete ptr;
 }
@@ -27,6 +33,10 @@ std::vector<uint8_t> DjinniBinary::to_cpp(const cgo__binary & str) {
     auto result = std::vector<uint8_t>(str.data, str.data + str.length);
     // free cgo_binary
     return result;
+}
+
+std::vector<uint8_t> DjinniBinary::to_cpp(cgo__binary * str) {
+    return to_cpp(*str);
 }
 
 void free_cgo_binary(cgo__binary * ptr) {
