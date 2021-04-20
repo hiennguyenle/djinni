@@ -2,7 +2,7 @@ fastlane_version "2.70.1"
 default_platform :ios
 
 def get_libary_version
-    return '4.6.1'
+    return '4.7.0'
 end
 
 lane :submit_podspecs do
@@ -15,13 +15,13 @@ lane :submit_podspecs do
         use_libraries: true,
         verbose: true)
 
-    # version_bump_podspec(path: "DjinniSwift.podspec", version_number: get_libary_version)
-    # pod_push(path: "DjinniSwift.podspec",
-    #     repo: "misfit-podspecs",
-    #     sources: ['git@bitbucket.org:misfitwearablesinc/misfit-podspecs.git','https://github.com/CocoaPods/Specs.git'],
-    #     allow_warnings: true,
-    #     verbose: true,
-    #     skip_import_validation: true,
-    #     use_libraries: true)
+    version_bump_podspec(path: "DjinniSwift.podspec", version_number: get_libary_version)
+    pod_push(path: "DjinniSwift.podspec",
+        repo: "misfit-podspecs",
+        sources: ['git@bitbucket.org:misfitwearablesinc/misfit-podspecs.git','https://github.com/CocoaPods/Specs.git'],
+        allow_warnings: true,
+        verbose: true,
+        skip_import_validation: true,
+        use_libraries: true)
 
 end
