@@ -1,3 +1,40 @@
+
+ti = enum {
+    A;
+    B;
+    C;
+}
+
+b = record {
+    val: u8;
+}
+
 hien = record {
     val: i8;
+    test_4: list<i32>;
+    test_5: list<b>;
+    b: b;
+    c: optional<u8>;
+}
+
+fitness = interface +c {
+    static create(): fitness;
+
+    parse(h: hien, h1: u8, s: string, l: list<hien>): hien;
+
+    test();
+
+    test_1(): i8;
+
+    test_2(): optional<hien>;
+
+    test_3(): optional<i8>;
+
+    test_4(): list<i32>;
+
+    test_5(): list<hien>;
+
+    test_6(): list<binary>;
+
+    test_7(): ti;
 }

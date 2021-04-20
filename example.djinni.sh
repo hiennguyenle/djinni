@@ -1,4 +1,4 @@
---idl source/test/example.djinni 
+--idl ../example/example.djinni 
 --java-out "source/test/generated-src/java" 
 --java-package "com.fossil.djinni" 
 --java-class-access-modifier "package" 
@@ -17,10 +17,10 @@
 --objc-out "source/test/generated-src/objc"
 --objcpp-out "source/test/generated-src/objc"
 --objc-type-prefix TXS
---objc-swift-bridging-header "TextSort-Bridging-Header"
 --objc-support-swift-name true
 --py-out "source/test/generated-src/python"
 --pycffi-package-name PyCFFIlib
 --pycffi-dynamic-lib-list textsort_py
 --pycffi-out "source/test/generated-src/cffi"
 --c-wrapper-out "source/test/generated-src/cwrapper"
+--cgo-wrapper-out "source/test/generated-src/cgo"
