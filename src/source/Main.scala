@@ -100,6 +100,8 @@ object Main {
     var swiftIdentStyle = IdentStyle.swiftDefault
     var swiftOutFolder: Option[File] = None
     var swiftGeneratedHeader: Option[String] = None
+    var cgoWrapperOutFolder: Option[File] = None
+    var cppJsonExtension: Boolean = true
 
     val argParser: OptionParser[Unit] = new scopt.OptionParser[Unit]("djinni") {
       def identStyle(optionName: String, update: IdentConverter => Unit): OptionDef[String, Unit] = {
@@ -180,6 +182,9 @@ object Main {
         .text("The namespace name to use for generated JNI C++ classes.")
       opt[String]("jni-base-lib-include-prefix").valueName("...").foreach(x => jniBaseLibIncludePrefix = x)
         .text("The JNI base library's include path, relative to the JNI C++ classes.")
+
+
+
       note("")
       opt[File]("objc-out").valueName("<out-folder>").foreach(x => objcOutFolder = Some(x))
         .text("The output folder for Objective-C files (Generator disabled if unspecified).")
@@ -200,6 +205,10 @@ object Main {
 
       opt[Boolean]("objc-closed-enums").valueName("<true/false>").foreach(x => objcClosedEnums = x)
         .text("All generated Objective-C enums will be NS_CLOSED_ENUM (default: false). ")
+      note("")
+      opt[File]("cgo-wrapper-out").valueName("<out-folder>").foreach(x => cgoWrapperOutFolder = Some(x))
+        .text("The output folder for Cgo wrapper files (Generator disabled if unspecified).")
+
 
       note("")
       opt[File]("objcpp-out").valueName("<out-folder>").foreach(x => objcppOutFolder = Some(x))
@@ -257,6 +266,9 @@ object Main {
         .text("The output folder for Wrapper C files (Generator disabled if unspecified).")
       opt[String]("py-import-prefix").valueName("<import-prefix>").foreach(pyImportPrefix = _)
         .text("The import prefix used within python genereated files (default: \"\")")
+      opt[Boolean]("cpp-json-extension").valueName("<true/false>").foreach(x => cppJsonExtension = x)
+        .text("Way of specifying if file generation should be skipped (default: false)")
+
 
       note("\nIdentifier styles (ex: \"FooBar\", \"fooBar\", \"foo_bar\", \"FOO_BAR\", \"m_fooBar\")\n")
       identStyle("ident-java-enum", c => {
@@ -493,7 +505,9 @@ object Main {
       pyImportPrefix,
       swiftIdentStyle,
       swiftOutFolder,
-      swiftGeneratedHeader
+      swiftGeneratedHeader,
+      cgoWrapperOutFolder,
+      cppJsonExtension
     )
 
     try {

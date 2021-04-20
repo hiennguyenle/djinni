@@ -1,67 +1,40 @@
-my_enum = enum {
-    hien = 1;
-    workout;
-    running;
+
+ti = enum {
+    A;
+    B;
+    C;
 }
 
-rc = record {
-    a: i32;
-    b: i32;
-    c: optional<i32>;
-    d: my_enum;
-    e: binary;
+b = record {
+    val: u8;
 }
 
-hello = interface +c {
-    static create(): hello;
-
-    say_hi(): my_enum;
-
-    print(rc: my_record): my_record;
+hien = record {
+    val: i8;
+    test_4: list<i32>;
+    test_5: list<b>;
+    b: b;
+    c: optional<u8>;
 }
 
-my_record = record {
-    test: i32;
+fitness = interface +c {
+    static create(): fitness;
 
-    test1: optional<u32>;
+    parse(h: hien, h1: u8, s: string, l: list<hien>): hien;
 
-    test2: list<u32>;
+    test();
 
-    test3: string;
+    test_1(): i8;
 
-    test3_1: optional<string>;
+    test_2(): optional<hien>;
 
-    test4: date;
-    
-    test4_1: optional<date>;
+    test_3(): optional<i8>;
 
-    test5: binary;
+    test_4(): list<i32>;
 
-    test6: list<binary>;
+    test_5(): list<hien>;
 
-    test7: set<i32>;
+    test_6(): list<binary>;
 
-    test8: map<i32, string>;
-
-    test9: rc;
-
-    test10: optional<rc>;
-
-    test10_1: list<rc>;
-
-    test11: my_enum;
-
-    test13: optional<my_enum>;
-
-    test14: optional<i16>;
-
-    test15: list<my_enum>;
-
-    test16: set<my_enum>;
-
-    test17: map<my_enum, i16>;
-}
-
-json_record = record {
-    optional_rc: optional<rc>;
+    test_7(): ti;
 }
