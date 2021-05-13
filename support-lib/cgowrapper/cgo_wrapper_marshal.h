@@ -10,10 +10,16 @@
 #include <stdint.h>
 #include <stdio.h>
 
+//typedef struct cgo__list__uint8_t_ {
+//    size_t length;
+//    uint8_t * data;
+//} cgo__list__uint8_t;
+
+
 // Cgo string
-typedef struct cgo__string {
+typedef struct cgo__string_ {
     size_t length;
-    const char * str;
+    const char * data;
 } cgo__string;
 
 void free_cgo_string(cgo__string * ptr);

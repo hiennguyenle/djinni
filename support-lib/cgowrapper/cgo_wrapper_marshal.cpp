@@ -6,14 +6,19 @@
 //
 
 #include "cgo_wrapper_marshal.hpp"
+#include <string>
 
 std::unique_ptr<cgo__string> DjinniString::from_cpp(const std::string & str) {
-    cgo__string cgo = cgo__string {str.length(), str.c_str()};
-    return std::make_unique<cgo__string>(cgo);
+    
+    size_t size = str.length();
+    char * data = new char[size];
+    std::memcpy(data, str.c_str(), size);
+    cgo__string *cgo = new cgo__string({size, data});
+    return std::unique_ptr<cgo__string>(std::move(cgo));
 }
 
 std::string DjinniString::to_cpp(const cgo__string & str) {
-    return std::string(str.str, str.length);
+    return std::string(str.data, str.length);
 }
 
 std::string DjinniString::to_cpp(cgo__string * str) {
