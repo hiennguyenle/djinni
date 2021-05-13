@@ -52,7 +52,7 @@ class CgoWrapperMarshal(spec: Spec) extends Marshal(spec) { // modeled(pretty mu
             m match {
                 case p: MPrimitive => p.cName
                 case MDate => "uint64_t"
-                case MString => structPrefix + cgo + "string"
+                case MString => structPrefix + cgo + "string *"
                 case MBinary => structPrefix + cgo + "binary"
                 case MList =>
                     val returnType = base(tm.args.head.base)
@@ -196,7 +196,7 @@ class CgoWrapperMarshal(spec: Spec) extends Marshal(spec) { // modeled(pretty mu
                         s"CgoPrimitive<${p.cName}>::from_cpp($expr).release()"
                     else
                         expr
-                case meta.MString => s"DjinniString::from_cpp(std::move($expr))"
+                case meta.MString => s"DjinniString::from_cpp(std::move($expr)).release()"
                 case meta.MList =>
                     val cppHelperClass = s"$djinniWrapper" + idCpp.typeParam(cgoWrapperTypeName(tm))
                     s"$cppHelperClass::from_cpp(std::move($expr)).release()"
@@ -263,7 +263,7 @@ class CgoWrapperMarshal(spec: Spec) extends Marshal(spec) { // modeled(pretty mu
     def free_memory(tm: MExpr, expr: String): Option[String] = {
         def base(m: Meta, pointer: Boolean = false): Option[String] = m match {
             case opaque: MOpaque => opaque match {
-                case meta.MString => Option(s"free_cgo_string(&($expr))")
+                case meta.MString => Option(s"free_cgo_string($expr)")
                 case meta.MList =>
                     val list_name = s"${cgoWrapperTypeName(tm)}"
                     Option(s"${list_name}__delete($expr)")

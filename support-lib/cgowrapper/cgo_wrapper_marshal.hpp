@@ -16,7 +16,7 @@
 #include "cgo_wrapper_marshal.h"
 
 struct DjinniString {
-    static cgo__string from_cpp(const std::string & str);
+    static std::unique_ptr<cgo__string> from_cpp(const std::string & str);
     static std::string to_cpp(const cgo__string & str);
     static std::string to_cpp(cgo__string * str);
 };
